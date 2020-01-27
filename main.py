@@ -11,10 +11,11 @@ from tqdm import tqdm_notebook
 # %matplotlib inline
 import cv2 as cv
 
-DATA_FOLDER = 'C:\\Users\\nic_f\\PycharmProjects\\gaiters_deepfake_detection\\data'
+DATA_FOLDER = 'C:\\Users\\Malou\\Desktop\\gaiters_dfdc_repo\\data'
+
 TRAIN_SAMPLE_FOLDER = 'train_sample_videos'
 TEST_FOLDER = 'test_videos'
-
+print("Malou's push")
 print(f"Train samples: {len(os.listdir(os.path.join(DATA_FOLDER, TRAIN_SAMPLE_FOLDER)))}")
 # print(f"Test samples: {len(os.listdir(os.path.join(DATA_FOLDER, TEST_FOLDER)))}")
 
@@ -27,7 +28,7 @@ train_list = list(os.listdir(os.path.join(DATA_FOLDER, TRAIN_SAMPLE_FOLDER)))
 ext_dict = []
 for file in train_list:
     file_ext = file.split('.')[1]
-    if (file_ext not in ext_dict):
+    if file_ext not in ext_dict:
         ext_dict.append(file_ext)
 print(f"Extensions: {ext_dict}")
 
@@ -59,7 +60,7 @@ def missing_data(data):
         dtype = str(data[col].dtype)
         types.append(dtype)
     tt['Types'] = types
-    return (np.transpose(tt))
+    return np.transpose(tt)
 
 
 missing_data(meta_train_df)
@@ -75,7 +76,8 @@ def unique_values(data):
         unique = data[col].nunique()
         uniques.append(unique)
     tt['Uniques'] = uniques
-    return(np.transpose(tt))
+    return np.transpose(tt)
+
 
 unique_values(meta_train_df)
 
@@ -95,37 +97,38 @@ def most_frequent_values(data):
     tt['Most frequent item'] = items
     tt['Frequence'] = vals
     tt['Percent from total'] = np.round(vals / total * 100, 3)
-    return(np.transpose(tt))
+    return np.transpose(tt)
+
 
 most_frequent_values(meta_train_df)
 
+
 # -- Data Distribution
 def plot_count(feature, title, df, size=1):
-    '''
+    """
     Plot count of classes / feature
     param: feature - the feature to analyze
     param: title - title to add to the graph
     param: df - dataframe from which we plot feature's classes distribution
     param: size - default 1.
-    '''
-    f, ax = plt.subplots(1,1, figsize=(4*size,4))
+    """
+    f, ax = plt.subplots(1, 1, figsize=(4 * size, 4))
     total = float(len(df))
-    g = sns.countplot(df[feature], order = df[feature].value_counts().index[:20], palette='Set3')
+    g = sns.countplot(df[feature], order=df[feature].value_counts().index[:20], palette='Set3')
     g.set_title("Number and percentage of {}".format(title))
-    if(size > 2):
+    if size > 2:
         plt.xticks(rotation=90, size=8)
     for p in ax.patches:
         height = p.get_height()
-        ax.text(p.get_x()+p.get_width()/2.,
+        ax.text(p.get_x() + p.get_width() / 2.,
                 height + 3,
-                '{:1.2f}%'.format(100*height/total),
+                '{:1.2f}%'.format(100 * height / total),
                 ha="center")
     plt.show()
 
 
 plot_count('split', 'split (train)', meta_train_df)
 plot_count('label', 'label (train)', meta_train_df)
-
 
 #
 # meta = np.array(list(meta_train_df.index))
