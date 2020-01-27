@@ -15,7 +15,7 @@ DATA_FOLDER = 'C:\\Users\\Malou\\Desktop\\gaiters_dfdc_repo\\data'
 
 TRAIN_SAMPLE_FOLDER = 'train_sample_videos'
 TEST_FOLDER = 'test_videos'
-print("Malou's push")
+print("test push (Malou)")
 print(f"Train samples: {len(os.listdir(os.path.join(DATA_FOLDER, TRAIN_SAMPLE_FOLDER)))}")
 # print(f"Test samples: {len(os.listdir(os.path.join(DATA_FOLDER, TEST_FOLDER)))}")
 
