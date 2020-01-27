@@ -9,7 +9,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from tqdm import tqdm_notebook
 # %matplotlib inline
-import cv2 as cv
+# import cv2 as cv
 
 DATA_FOLDER = 'C:\\Users\\Malou\\Desktop\\gaiters_dfdc_repo\\data'
 
