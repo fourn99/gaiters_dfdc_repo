@@ -6,14 +6,20 @@ import matplotlib
 import seaborn as sns
 import matplotlib.pyplot as plt
 from tqdm import tqdm_notebook
-from dotenv import load_dotenv
 # %matplotlib inline
 import cv2 as cv
 import os
 from ObjectDetector import *
-
+from os.path import join, dirname
+from dotenv import load_dotenv
 # get environment variables
-load_dotenv('C:\\Users\\nic_f\\PycharmProjects\\gaiters_deepfake_detection\\.env')
+
+
+# Create .env file path.
+dotenv_path = join(dirname(__file__), '.env')
+
+# Load file from the path.
+load_dotenv(dotenv_path)
 DATA_FOLDER = os.getenv('DATA_FOLDER')
 TRAIN_SAMPLE_FOLDER = os.getenv('TRAIN_SAMPLE_FOLDER')
 FACE_DETECTION_FOLDER = os.getenv('FACE_DETECTION_FOLDER')
@@ -146,7 +152,6 @@ fake_train_sample_video = list(meta_train_df.loc[meta_train_df.label=='FAKE'].sa
 fake_train_sample_video
 
 
-
 def display_image_from_video(video_path):
     '''
     input: video_path - path for video
@@ -161,6 +166,7 @@ def display_image_from_video(video_path):
     ax = fig.add_subplot(111)
     frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
     ax.imshow(frame)
+
 
 for video_file in fake_train_sample_video:
     display_image_from_video(os.path.join(DATA_FOLDER, TRAIN_SAMPLE_FOLDER, video_file))
