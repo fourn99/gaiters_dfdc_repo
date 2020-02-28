@@ -1,3 +1,7 @@
 /data/train_sample_videos/*
 /.idea/*
 .env
+/data/test_videos/*
+/data/meso-pretrain/*
+/data/sample_submission.csv
+/data/deepfake/*
