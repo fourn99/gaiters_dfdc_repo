@@ -95,6 +95,7 @@ for video in tqdm.tqdm(test_video_files):
     except Exception as err:
       print(err)
 '''
+#todo Implement Face extraction code from lee & manel; save as jpegs
 
 # %%
 
@@ -380,7 +381,7 @@ def schedule(epoch):
 
 # %%
 
-LOAD_PRETRAIN = True
+LOAD_PRETRAIN = False
 
 # %%
 
@@ -546,7 +547,7 @@ correct_precentile(model_pred, val_y)
 del X, y, val_X, val_y
 
 # %%
-
+#todo addapt following procedure to read and save test videos
 MAX_SKIP = 10
 NUM_FRAME = 150
 test_dir = 'C:\\Users\\admin\\PycharmProjects\\gaiters_dfdc_repo\\data\\test_videos'
