@@ -6,3 +6,4 @@
 frame*
 /cnn_test.py
 /notebooks/cnn_full_frame.ipynb
+/ObjectDetector.py
