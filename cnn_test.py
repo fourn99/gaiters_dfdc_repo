@@ -550,7 +550,7 @@ del X, y, val_X, val_y
 #todo addapt following procedure to read and save test videos
 MAX_SKIP = 10
 NUM_FRAME = 150
-test_dir = 'C:\\Users\\admin\\PycharmProjects\\gaiters_dfdc_repo\\data\\test_videos'
+test_dir = 'C:\\Users\\admin\\PycharmProjects\\gaiters_dfdc_repo\\data\\test_videos\\'
 filenames = os.listdir(test_dir)
 prediction_filenames = filenames
 test_video_files = [test_dir + x for x in filenames]
@@ -606,7 +606,7 @@ def detect_video(video):
             count += 1
         if bounding_box == []:
             print('no faces found')
-            prediction_filenames.remove(video.replace('/kaggle/input/deepfake-detection-challenge/test_videos/', ''))
+            prediction_filenames.remove(video.replace('C:\\Users\\admin\\PycharmProjects\\gaiters_dfdc_repo\\data\\test_videos\\', ''))
             return None
     x, y, w, h = bounding_box
     v_cap.release()
