@@ -5,4 +5,6 @@ seaborn
 tqdm
 cv2
 python-dotenv
+keras
+mtcnn
 
