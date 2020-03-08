@@ -98,6 +98,33 @@ for video in tqdm.tqdm(test_video_files):
 #todo Implement Face extraction code from lee & manel; save as jpegs
 
 # %%
+import os
+from zipfile import ZipFile
+from tqdm import tqdm
+
+dir_counter = 0
+zipped_path = 'D:\\Deep_Fake\\dfdc_train_all\\'
+test_video_files_zip = [zipped_path + x for x in os.listdir(zipped_path)]
+
+for video in tqdm(test_video_files_zip[4:]):
+    try:
+        # Example path  D:\Deep_Fake\dfdc_train_all\dfdc_train_part_01\dfdc_train_part_1
+        print(video)
+        path_destination = video.replace('.zip', '')
+        print(path_destination)
+
+         # opening the zip file in READ mode
+        with ZipFile(video, 'r') as zip:
+            # extracting all the files
+            print('Extracting all the files now...')
+            zip.extractall(path_destination)
+            print('Done!')
+        os.remove(video)
+    except Exception as err:
+      print(err)
+
+
+# %%
 
 import pandas as pd
 import keras
@@ -174,9 +201,8 @@ df_trains = [df_train0, df_train1, df_train2, df_train3, df_train4,
              df_train17, df_train18, df_train19, df_train20, df_train21, df_train22,
              df_train23, df_train24, df_train25, df_train26, df_train27, df_train28,
              df_train29, df_train30, df_train31, df_train32, df_train33, df_train34,
-             df_train34, df_train35, df_train36, df_train37, df_train38, df_train39,
-             df_train40, df_train41, df_train42, df_train43, df_train44, df_train45,
-             df_train46]
+             df_train35, df_train36, df_train37, df_train38, df_train39, df_train40,
+             df_train41, df_train42, df_train43, df_train44, df_train45, df_train46]
 df_vals = [df_val1, df_val2, df_val3]
 nums = list(range(len(df_trains) + 1))
 LABELS = ['REAL', 'FAKE']
