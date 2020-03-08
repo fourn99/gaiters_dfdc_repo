@@ -5,3 +5,6 @@
 /data/meso-pretrain/*
 /data/sample_submission.csv
 /data/deepfake/*
+/unzip_script.py
+/data/cropped_frame/*
+
