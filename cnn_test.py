@@ -98,33 +98,6 @@ for video in tqdm.tqdm(test_video_files):
 #todo Implement Face extraction code from lee & manel; save as jpegs
 
 # %%
-import os
-from zipfile import ZipFile
-from tqdm import tqdm
-
-dir_counter = 0
-zipped_path = 'D:\\Deep_Fake\\dfdc_train_all\\'
-test_video_files_zip = [zipped_path + x for x in os.listdir(zipped_path)]
-
-for video in tqdm(test_video_files_zip[4:]):
-    try:
-        # Example path  D:\Deep_Fake\dfdc_train_all\dfdc_train_part_01\dfdc_train_part_1
-        print(video)
-        path_destination = video.replace('.zip', '')
-        print(path_destination)
-
-         # opening the zip file in READ mode
-        with ZipFile(video, 'r') as zip:
-            # extracting all the files
-            print('Extracting all the files now...')
-            zip.extractall(path_destination)
-            print('Done!')
-        os.remove(video)
-    except Exception as err:
-      print(err)
-
-
-# %%
 
 import pandas as pd
 import keras
@@ -195,6 +168,7 @@ df_train46 = pd.read_json('./data/deepfake/metadata46.json')
 df_val1 = pd.read_json('./data/deepfake/metadata47.json')
 df_val2 = pd.read_json('./data/deepfake/metadata48.json')
 df_val3 = pd.read_json('./data/deepfake/metadata49.json')
+
 df_trains = [df_train0, df_train1, df_train2, df_train3, df_train4,
              df_train5, df_train6, df_train7, df_train8, df_train9, df_train10,
              df_train11, df_train12, df_train13, df_train14, df_train15, df_train16,
