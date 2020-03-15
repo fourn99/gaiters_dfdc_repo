@@ -2,7 +2,7 @@
 
 def main():
 
-    print('hello')
+    print('Hello')
 
 
 

@@ -168,15 +168,15 @@ df_train46 = pd.read_json('./data/deepfake/metadata46.json')
 df_val1 = pd.read_json('./data/deepfake/metadata47.json')
 df_val2 = pd.read_json('./data/deepfake/metadata48.json')
 df_val3 = pd.read_json('./data/deepfake/metadata49.json')
+
 df_trains = [df_train0, df_train1, df_train2, df_train3, df_train4,
              df_train5, df_train6, df_train7, df_train8, df_train9, df_train10,
              df_train11, df_train12, df_train13, df_train14, df_train15, df_train16,
              df_train17, df_train18, df_train19, df_train20, df_train21, df_train22,
              df_train23, df_train24, df_train25, df_train26, df_train27, df_train28,
              df_train29, df_train30, df_train31, df_train32, df_train33, df_train34,
-             df_train34, df_train35, df_train36, df_train37, df_train38, df_train39,
-             df_train40, df_train41, df_train42, df_train43, df_train44, df_train45,
-             df_train46]
+             df_train35, df_train36, df_train37, df_train38, df_train39, df_train40,
+             df_train41, df_train42, df_train43, df_train44, df_train45, df_train46]
 df_vals = [df_val1, df_val2, df_val3]
 nums = list(range(len(df_trains) + 1))
 LABELS = ['REAL', 'FAKE']
@@ -550,7 +550,7 @@ del X, y, val_X, val_y
 #todo addapt following procedure to read and save test videos
 MAX_SKIP = 10
 NUM_FRAME = 150
-test_dir = 'C:\\Users\\admin\\PycharmProjects\\gaiters_dfdc_repo\\data\\test_videos'
+test_dir = 'C:\\Users\\admin\\PycharmProjects\\gaiters_dfdc_repo\\data\\test_videos\\'
 filenames = os.listdir(test_dir)
 prediction_filenames = filenames
 test_video_files = [test_dir + x for x in filenames]
@@ -606,7 +606,7 @@ def detect_video(video):
             count += 1
         if bounding_box == []:
             print('no faces found')
-            prediction_filenames.remove(video.replace('/kaggle/input/deepfake-detection-challenge/test_videos/', ''))
+            prediction_filenames.remove(video.replace('C:\\Users\\admin\\PycharmProjects\\gaiters_dfdc_repo\\data\\test_videos\\', ''))
             return None
     x, y, w, h = bounding_box
     v_cap.release()
