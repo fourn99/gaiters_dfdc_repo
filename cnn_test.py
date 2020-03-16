@@ -219,12 +219,8 @@ for df_val, num in tqdm(zip(df_vals, val_nums), total=len(df_vals)):
             # print(err)
             pass
 
-# %% md
-
-# Apply Underbalancing Techinique
-
 # %%
-
+# Apply Underbalancing Techinique
 print('There are ' + str(y.count(1)) + ' fake train samples')
 print('There are ' + str(y.count(0)) + ' real train samples')
 print('There are ' + str(val_y.count(1)) + ' fake val samples')
@@ -478,6 +474,8 @@ def larger_range(model_pred, time):
 # %%
 
 best_model_pred = models[losses.index(min(losses))].predict([val_X])
+#%%
+# create procedure to getweights of best model and save them
 
 # %%
 
@@ -548,6 +546,7 @@ del X, y, val_X, val_y
 
 # %%
 #todo addapt following procedure to read and save test videos
+
 MAX_SKIP = 10
 NUM_FRAME = 150
 test_dir = 'C:\\Users\\admin\\PycharmProjects\\gaiters_dfdc_repo\\data\\test_videos\\'
@@ -621,6 +620,10 @@ for video in tqdm(test_video_files):
     test_X.append(x)
 
 # %%
+# create procedure to fetch model and set weight to our pretrained weigths
+
+
+#%%
 
 df_test = pd.read_csv('C:\\Users\\admin\\PycharmProjects\\gaiters_dfdc_repo\\data\\sample_submission.csv')
 df_test['label'] = 0.5
