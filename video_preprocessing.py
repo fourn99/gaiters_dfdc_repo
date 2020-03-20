@@ -18,7 +18,8 @@ predictor = dlib.shape_predictor(predictor_path)
 net = cv2.dnn.readNetFromCaffe('./deploy.prototxt.txt', './res10_300x300_ssd_iter_140000.caffemodel')
 
 
-def image_face_detector(confidence, image):
+
+def image_face_detector(image):
     """
     :param confidence: Certainty of detection
     :param image_paths: all images to be processed
@@ -28,60 +29,41 @@ def image_face_detector(confidence, image):
     Desc: On image input, applies face detection and confidence level of detection
     """
 
-    face_detection_coordinates = (1, 3, 2)  # fixed value for now
-    face_detection_coordinates = np.zeros(face_detection_coordinates)
-
     # load the input image and construct an input blob for the image
     # by resizing to a fixed 300x300 pixels and then normalizing it
-    # image = cv2.imread(image_paths)
     (h, w) = image.shape[:2]
 
-    blob = cv2.dnn.blobFromImage(cv2.resize(image, (300, 300)), 0.2, (300, 300), (104.0, 177.0, 123.0))
+    blob = cv2.dnn.blobFromImage(cv2.resize(image, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
 
     net.setInput(blob)
     detections = net.forward()
 
+    face_detection_coordinates = []
     # loop over the detections
-    for i in range(0, len(detections)):
-        #print ("i: ", i)
+    for i in range(0, detections.shape[2]):
+
         # extract the confidence (i.e., probability) associated with the
         # prediction
         confidence = detections[0, 0, i, 2]
 
         # filter out weak detections by ensuring the `confidence` is
-        # greater than the minimum confidence
-        if confidence > 0.5:
-            # compute the (x, y)-coordinates of the bounding box for the object
+        # greater than the mi
+        # nimum confidence
+        if confidence > 0.4:
+            # compute the (x, y)-coordinates of the bounding box for the
+            # object
             box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
             (startX, startY, endX, endY) = box.astype("int")
-
-            face_detection_coordinates[i] = (0, confidence), (startX-50 if startX-50 > 0 else 0, startY-50 if startY-50 > 0 else 0), (endX+50 if endX+50 < h else h, endY+50 if endY+50 < h else h)
-
-            #cv2.imshow('cnn', image[int(startY-50 if startY-50 > 0 else startY): int(endY+50 if endY+50 < h else endY), int(startX-50 if startX-50 > 0 else startX):int(endX+50 if endX+50 < h else endX)])
-            #cv2.waitKey()
-
-
-            '''writing text commented out'''
-            # draw the bounding box of the face along with the associated
-            # probability
-            # text = "{:.2f}%".format(confidence * 100)
-            # y = startY - 10 if startY - 10 > 10 else startY + 10
-            # cv2.rectangle(image, (startX, startY), (endX, endY), (0, 0, 255), 2)
-            # cv2.putText(image, text, (startX, y), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
-
-    # show the output image
+            face_detection_coordinates.append(((startX, startY), (endX, endY)))
     '''
-    cv2.imshow("Output", image)
-    cv2.resizeWindow('output', 600, 600)
-    cv2.waitKey(1)    
+    cv2.imshow("output", image)
+    cv2.waitKey(1)
     '''
-
     return face_detection_coordinates
 
 
 def detect_video(video_path, video_name, frames_to_capture, destination):
     count = 0
-
     # capture the video into frames
     vid = cv2.VideoCapture(video_path + video_name)
     video_name = video_name.replace('.mp4', '')
@@ -90,11 +72,11 @@ def detect_video(video_path, video_name, frames_to_capture, destination):
         ret, cap = vid.read()  # Capture frame-by-frame
         if cap is not None:
             # number of faces detected in frame
-            cr = image_face_detector(50, cap)
+            cr = image_face_detector(cap)
             for i in range(len(cr)):
-                frame = cap[int(cr[i][1][1]): int(cr[i][2][1]), int(cr[i][1][0]):int(cr[i][2][0])]
+                frame = cap[int(cr[i][0][1]): int(cr[i][1][1]), int(cr[i][0][0]):int(cr[i][1][0])]
                 dets = detector(frame, 0)  # cropped image
-                if len(dets) == 0 and int(cr[i][2][1]) != 0:
+                if len(dets) == 0 and int(cr[i][1][1]) != 0:
                     cv2.imwrite(destination + video_name + '_frames' + '\\' + video_name + "_cropped_frame_%d.jpg" % count, frame)
                 # draw points on face for each rectangle
                 for k, d in enumerate(dets):
@@ -126,7 +108,6 @@ def detect_video(video_path, video_name, frames_to_capture, destination):
         else:
             vid.release()
             break
-
 
 # this video has nothing being capture... to INVESTIGATE
 # detect_video(video_path='D:\\Deep_Fake\\dfdc_train_all\\dfdc_train_part_00\\dfdc_train_part_0\\',
@@ -162,7 +143,7 @@ for i in range(len(vid_sub_dir)):
                 shutil.copyfile(test_video_dir + video, destination_dir + 'metadata' + str(i) + '.json')
                 # print('From: ' + test_video_dir + video + '\nToo: ' + destination_dir + 'metadata' + str(i) + '.json')
             start = process_time()
-            detect_video(video_path=test_video_dir, video_name=video, frames_to_capture=60,
+            detect_video(video_path=test_video_dir, video_name=video, frames_to_capture=200,
                          destination=destination_dir)
             print("total time: ", process_time() - start)
             # if img_file is None:
