@@ -12,6 +12,7 @@ import dlib
 import cv2
 import tqdm
 
+#%%
 predictor_path = "shape_predictor_68_face_landmarks.dat"
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor(predictor_path)
@@ -127,41 +128,71 @@ def detect_video(video_path, video_name, frames_to_capture, destination):
 #              video_name='abhggqdift.mp4',
 #              frames_to_capture=30,
 #              destination='D:\\Deep_Fake\\dfdc_train_all_jpegs\\dfdc_train_part_0\\')
-
+#%%
 # source folder with all videos
-all_train_dir = 'D:\\Deep_Fake\\dfdc_train_all\\'
+all_train_dir = 'E:\\dfdc_train_all\\'
+# all_train_dir = 'D:\\Deep_Fake\\dfdc_train_all\\' #todo uncomment this, delete path above
+
 # array of all the subdirectories
 vid_sub_dir = [all_train_dir + x for x in os.listdir(all_train_dir)]
-
 test_video_files = []
+os.makedirs('./data/deepfake_jpegs', exist_ok=True)
 
 # going through each subdirectory
-for i in range(len(vid_sub_dir)):
-    # go inside fodler with videos
-    test_video_dir = vid_sub_dir[i] + '\\' + str(
-        os.listdir(vid_sub_dir[i])[0]) + '\\'  # D:\Deep_Fake\dfdc_train_all\dfdc_train_part_00\dfdc_train_part_0\
-    # test_video_files = [test_video_dir + x for x in os.listdir(test_video_dir)
+# for i in range(len(vid_sub_dir)):
+for i in range(1):#todo uncomment above line and delete this one once testing is done
+    # go inside folder with videos
+    test_video_dir = vid_sub_dir[i] + '\\' + str(os.listdir(vid_sub_dir[i])[0]) + '\\'
+    # e.g.: test_video_dir[0] -> D:\Deep_Fake\dfdc_train_all\dfdc_train_part_00\dfdc_train_part_0\
+
     # an array of all the videos in tht sub directory
     test_video_files = os.listdir(test_video_dir)
 
     # makes directory for the subdirectory of the training video
-    os.makedirs('D:\\Deep_Fake\\dfdc_train_all_jpegs\\' + str(os.listdir(vid_sub_dir[i])[0]), exist_ok=True)
+    os.makedirs('./data/deepfake_jpegs/' + str(os.listdir(vid_sub_dir[i])[0]), exist_ok=True)
     # get directory name of the directory just made
-    destination_dir = 'D:\\Deep_Fake\\dfdc_train_all_jpegs\\' + str(os.listdir(vid_sub_dir[i])[0]) + '\\'
+    destination_dir = './data/deepfake_jpegs/'+ str(os.listdir(vid_sub_dir[i])[0]) + '/'
 
     # for each video in the training subdirectory
     for video in tqdm.tqdm(test_video_files):
         try:
             if video == 'metadata.json':
-                shutil.copyfile(test_video_dir + video, destination_dir + 'metadata' + str(i) + '.json')
-                # print('From: ' + test_video_dir + video + '\nToo: ' + destination_dir + 'metadata' + str(i) + '.json')
+                shutil.copyfile(test_video_dir + video,  './data/deepfake_jpegs/metadata' + str(i) + '.json')
             start = process_time()
-            detect_video(video_path=test_video_dir, video_name=video, frames_to_capture=150,
-                         destination=destination_dir)
+            # detect_video(video_path=test_video_dir, video_name=video, frames_to_capture=150,
+            #              destination=destination_dir)
             print("total time: ", process_time() - start)
-            # if img_file is None:
-            #     count+=1
-            #     continue
-            # cv2.imwrite('./DeepFake'+d_num+'/'+video.replace('.mp4','').replace(test_dir,'')+'.jpg',img_file)
         except Exception as err:
             print(err)
+
+# procedure to save jpegs on D drive
+# # going through each subdirectory
+# for i in range(len(vid_sub_dir)):
+#     # go inside folder with videos
+#     test_video_dir = vid_sub_dir[i] + '\\' + str(os.listdir(vid_sub_dir[i])[0]) + '\\'
+#     # e.g.: test_video_dir[0] -> D:\Deep_Fake\dfdc_train_all\dfdc_train_part_00\dfdc_train_part_0\
+#
+#     # an array of all the videos in tht sub directory
+#     test_video_files = os.listdir(test_video_dir)
+#
+#     # makes directory for the subdirectory of the training video
+#     os.makedirs('D:\\Deep_Fake\\dfdc_train_all_jpegs\\' + str(os.listdir(vid_sub_dir[i])[0]), exist_ok=True)
+#     # get directory name of the directory just made
+#     destination_dir = 'D:\\Deep_Fake\\dfdc_train_all_jpegs\\' + str(os.listdir(vid_sub_dir[i])[0]) + '\\'
+#
+#     # for each video in the training subdirectory
+#     for video in tqdm.tqdm(test_video_files):
+#         try:
+#             if video == 'metadata.json':
+#                 shutil.copyfile(test_video_dir + video, destination_dir + 'metadata' + str(i) + '.json')
+#                 # print('From: ' + test_video_dir + video + '\nToo: ' + destination_dir + 'metadata' + str(i) + '.json')
+#             start = process_time()
+#             detect_video(video_path=test_video_dir, video_name=video, frames_to_capture=150,
+#                          destination=destination_dir)
+#             print("total time: ", process_time() - start)
+#             # if img_file is None:
+#             #     count+=1
+#             #     continue
+#             # cv2.imwrite('./DeepFake'+d_num+'/'+video.replace('.mp4','').replace(test_dir,'')+'.jpg',img_file)
+#         except Exception as err:
+#             print(err)
