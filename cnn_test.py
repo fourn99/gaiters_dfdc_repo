@@ -1,4 +1,100 @@
+# %%
+from mtcnn import MTCNN
+import tqdm
+import datetime
+import smtplib
+import os
+import cv2
+import numpy as np
+import sys
+import shutil
+'''
+# d_num = sys.argv[1]
+# if len(d_num) == 1:
+#     a_num = d_num
+#     d_num = '0' + d_num
+# else:
+#     a_num = d_num
+detector = MTCNN()
 
+
+def detect_face(img):
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    final = []
+    detected_faces_raw = detector.detect_faces(img)
+    if detected_faces_raw == []:
+        # print('no faces found')
+        return []
+    confidences = []
+    for n in detected_faces_raw:
+        x, y, w, h = n['box']
+        final.append([x, y, w, h])
+        confidences.append(n['confidence'])
+    if max(confidences) < 0.7:
+        return []
+    max_conf_coord = final[confidences.index(max(confidences))]
+    # return final
+    return max_conf_coord
+
+
+def crop(img, x, y, w, h):
+    x -= 40
+    y -= 40
+    w += 80
+    h += 80
+    if x < 0:
+        x = 0
+    if y <= 0:
+        y = 0
+    return cv2.cvtColor(cv2.resize(img[y:y + h, x:x + w], (256, 256)), cv2.COLOR_BGR2RGB)
+
+
+def detect_video(video):
+    v_cap = cv2.VideoCapture(video)
+    v_cap.set(1, NUM_FRAME)
+    success, vframe = v_cap.read()
+    vframe = cv2.cvtColor(vframe, cv2.COLOR_BGR2RGB)
+    bounding_box = detect_face(vframe)
+    if bounding_box == []:
+        count = 0
+        current = NUM_FRAME
+        while bounding_box == [] and count < MAX_SKIP:
+            current += 1
+            v_cap.set(1, current)
+            success, vframe = v_cap.read()
+            vframe = cv2.cvtColor(vframe, cv2.COLOR_BGR2RGB)
+            bounding_box = detect_face(vframe)
+            count += 1
+        if bounding_box == []:
+            print('hi')
+            return None
+    x, y, w, h = bounding_box
+    v_cap.release()
+    return crop(vframe, x, y, w, h)
+
+# D:\Deep_Fake\dfdc_train_all
+
+test_dir = './dfdc_train_part_' + a_num + '/'
+test_video_files = [test_dir + x for x in os.listdir(test_dir)]
+os.makedirs('./DeepFake' + d_num,exist_ok=True)
+MAX_SKIP = 10
+NUM_FRAME = 150
+count = 0
+print(test_dir)
+
+for video in tqdm.tqdm(test_video_files):
+    try:
+        if video=='./dfdc_train_part_'+a_num+'/metadata.json':
+            shutil.copyfile(video,'./metadata'+str(a_num)+'.json')
+        img_file=detect_video(video)
+        os.remove(video)
+        if img_file is None:
+            count+=1
+            continue
+        cv2.imwrite('./DeepFake'+d_num+'/'+video.replace('.mp4','').replace(test_dir,'')+'.jpg',img_file)
+    except Exception as err:
+      print(err)
+'''
 #todo Implement Face extraction code from lee & manel; save as jpegs
 
 # %%
@@ -12,41 +108,11 @@ from keras import Model, Sequential
 from keras.layers import *
 from keras.optimizers import *
 from sklearn.model_selection import train_test_split
+import cv2
 from tqdm import tqdm
 import glob
 from mtcnn import MTCNN
-import cv2
-
 # %%
-# UNZIP all zip files
-
-# # importing required modules
-# from zipfile import ZipFile
-#
-# zipped_file_paths = 'E:\\dfdc_train_all\\'
-#
-# for i in range(2,50):
-#     # specifying the zip file name
-#     if i < 10:
-#         file_name = "dfdc_train_part_0" + str(i) + ".zip"
-#     else:
-#         file_name = "dfdc_train_part_" + str(i) + ".zip"
-#
-#     zipped_full_path = zipped_file_paths + file_name
-#
-#     # opening the zip file in READ mode
-#     with ZipFile(zipped_full_path, 'r') as zip:
-#         # printing all the contents of the zip file
-#         zip.printdir()
-#         # extracting all the files
-#         print('Extracting all the files now...')
-#         zip.extractall(zipped_full_path.replace('.zip', ''))
-#
-#         print(file_name + " Fully Unzip " + str(i) + "/50")
-#     os.remove(zipped_full_path)
-
-#%%
-
 
 sorted(glob.glob('./data/deepfake/meta*'))
 
@@ -117,9 +183,8 @@ LABELS = ['REAL', 'FAKE']
 val_nums = [47, 48, 49]
 
 # %%
-
+#adapt for our files
 def get_path(num, x):
-
     num = str(num)
     if len(num) == 2:
         path = './data/deepfake/DeepFake' + num + '/DeepFake' + num + '/' + x.replace('.mp4', '') + '.jpg'
@@ -245,9 +310,7 @@ from keras.applications.inception_v3 import InceptionV3
 
 model_v3 = InceptionV3(include_top=False, weights='imagenet')
 print(model_v3.summary())
-
-
-# %%
+#%%
 def InceptionLayer(a, b, c, d):
     def func(x):
         x1 = Conv2D(a, (1, 1), padding='same', activation='elu')(x)
@@ -298,15 +361,35 @@ def define_model(shape=(256, 256, 3)):
     model.compile(loss='binary_crossentropy', optimizer=Adam(lr=1e-4))
     # model.summary()
     return model
+'''
+#%%
+import keras
+def define_model():
+    model2 = Sequential()
+    model2.add(InceptionV3(include_top=False, weights='imagenet'))
+    model2.add(LSTM(4, return_sequences=True, return_state=True))
+    model2.summary()
+    return model2
 
 
+define_model()
+#%%
+def cnn_lstm():
+    model10 = Sequential()
+    model10.add(Convolution2D(input_shape = 3, filters = 3, kernel_size = 3
+    , activation = 3))
+    model10.add(LSTM(units = 2, ))
+    return model10
+
+cnn_lstm()
+#%%
 df_model = define_model()
 df_model.load_weights('./data/meso-pretrain/MesoInception_DF')
 f2f_model = define_model()
 f2f_model.load_weights('./data/meso-pretrain/MesoInception_F2F')
 
 # %%
-
+'''
 from keras.callbacks import LearningRateScheduler
 
 lrs = [1e-3, 5e-4, 1e-4]
@@ -320,6 +403,16 @@ def schedule(epoch):
 
 LOAD_PRETRAIN = False
 
+inputs = model_v3.fit([X], [y], epochs=2, callbacks=[LearningRateScheduler(schedule)])
+lstm = tf.keras.layers.LSTM(4)
+
+output = lstm(inputs)  # The output has shape `[32, 4]`.
+
+lstm = tf.keras.layers.LSTM(4, return_sequences=True, return_state=True)
+
+# whole_sequence_output has shape `[32, 10, 4]`.
+# final_memory_state and final_carry_state both have shape `[32, 4]`.
+whole_sequence_output, final_memory_state, final_carry_state = lstm(inputs)
 
 # %%
 
@@ -587,9 +680,3 @@ df_test.head()
 # %%
 
 df_test.to_csv('submission.csv', index=False)
-
-#%%
-#
-#
-#
-# #%%

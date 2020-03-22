@@ -86,6 +86,8 @@ def detect_video(video_path, video_name, frames_to_capture, destination):
             cr = image_face_detector(cap)
             for i in range(len(cr)):
                 frame = cap[int(cr[i][0][1]): int(cr[i][1][1]), int(cr[i][0][0]):int(cr[i][1][0])]
+
+                '''
                 dets = detector(frame, 0)  # cropped image
                 #if len(dets) == 0 and int(cr[i][1][1]) != 0:
                 cv2.imwrite(destination + video_name + '_frames' + '\\' + video_name + "_cropped_frame_%d.jpg" % count, frame)
@@ -108,8 +110,8 @@ def detect_video(video_path, video_name, frames_to_capture, destination):
 
                     # writes cropped image of frame, with 25 pixel border
                     # [d.top() - 25:d.bottom() + 25, d.left() - 25:d.right() + 25]
-
-                    cv2.imwrite(destination + video_name + '_frames' + '\\' + video_name + "_cropped_frame_%d.jpg" % count, frame)
+                    '''
+                cv2.imwrite(destination + video_name + '_frames' + '\\' + video_name + "_cropped_frame_%d.jpg" % count, frame)
                     # cv2.imwrite(destination + '\\' + video_name + "_cropped_frame_%d.jpg" % count, frame)
 
                 # sets nect frame to the 30th next frame
@@ -154,7 +156,7 @@ for i in range(len(vid_sub_dir)):
                 shutil.copyfile(test_video_dir + video, destination_dir + 'metadata' + str(i) + '.json')
                 # print('From: ' + test_video_dir + video + '\nToo: ' + destination_dir + 'metadata' + str(i) + '.json')
             start = process_time()
-            detect_video(video_path=test_video_dir, video_name=video, frames_to_capture=300,
+            detect_video(video_path=test_video_dir, video_name=video, frames_to_capture=150,
                          destination=destination_dir)
             print("total time: ", process_time() - start)
             # if img_file is None:
