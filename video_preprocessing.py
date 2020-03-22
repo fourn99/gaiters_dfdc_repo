@@ -38,6 +38,18 @@ def image_face_detector(image):
     net.setInput(blob)
     detections = net.forward()
 
+
+    detections = detections[detections[:, :, :, 2] > 0.4]
+
+    face_detection_coordinates = []
+    #print(len(detections))
+    # loop over the detections
+    for i in range(0, len(detections)):
+        box = detections[i, 3:7] * np.array([w, h, w, h])
+        (startX, startY, endX, endY) = box.astype("int")
+        face_detection_coordinates.append(((startX, startY), (endX, endY)))
+
+    '''
     face_detection_coordinates = []
     # loop over the detections
     for i in range(0, detections.shape[2]):
@@ -45,17 +57,16 @@ def image_face_detector(image):
         # extract the confidence (i.e., probability) associated with the
         # prediction
         confidence = detections[0, 0, i, 2]
-
         # filter out weak detections by ensuring the `confidence` is
         # greater than the mi
         # nimum confidence
-        if confidence > 0.4:
+        if confidence > 0.6:
             # compute the (x, y)-coordinates of the bounding box for the
             # object
             box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
             (startX, startY, endX, endY) = box.astype("int")
             face_detection_coordinates.append(((startX, startY), (endX, endY)))
-    '''
+    
     cv2.imshow("output", image)
     cv2.waitKey(1)
     '''
@@ -76,8 +87,8 @@ def detect_video(video_path, video_name, frames_to_capture, destination):
             for i in range(len(cr)):
                 frame = cap[int(cr[i][0][1]): int(cr[i][1][1]), int(cr[i][0][0]):int(cr[i][1][0])]
                 dets = detector(frame, 0)  # cropped image
-                if len(dets) == 0 and int(cr[i][1][1]) != 0:
-                    cv2.imwrite(destination + video_name + '_frames' + '\\' + video_name + "_cropped_frame_%d.jpg" % count, frame)
+                #if len(dets) == 0 and int(cr[i][1][1]) != 0:
+                cv2.imwrite(destination + video_name + '_frames' + '\\' + video_name + "_cropped_frame_%d.jpg" % count, frame)
                 # draw points on face for each rectangle
                 for k, d in enumerate(dets):
                     # Get the landmarks/parts for the face in box d.
@@ -102,8 +113,8 @@ def detect_video(video_path, video_name, frames_to_capture, destination):
                     # cv2.imwrite(destination + '\\' + video_name + "_cropped_frame_%d.jpg" % count, frame)
 
                 # sets nect frame to the 30th next frame
-                count += frames_to_capture
-                vid.set(1, count)
+            count += frames_to_capture
+            vid.set(1, count)
 
         else:
             vid.release()
@@ -143,7 +154,7 @@ for i in range(len(vid_sub_dir)):
                 shutil.copyfile(test_video_dir + video, destination_dir + 'metadata' + str(i) + '.json')
                 # print('From: ' + test_video_dir + video + '\nToo: ' + destination_dir + 'metadata' + str(i) + '.json')
             start = process_time()
-            detect_video(video_path=test_video_dir, video_name=video, frames_to_capture=200,
+            detect_video(video_path=test_video_dir, video_name=video, frames_to_capture=300,
                          destination=destination_dir)
             print("total time: ", process_time() - start)
             # if img_file is None:
