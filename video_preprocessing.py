@@ -130,8 +130,8 @@ def detect_video(video_path, video_name, frames_to_capture, destination):
 #              destination='D:\\Deep_Fake\\dfdc_train_all_jpegs\\dfdc_train_part_0\\')
 #%%
 # source folder with all videos
-all_train_dir = 'E:\\dfdc_train_all\\'
-# all_train_dir = 'D:\\Deep_Fake\\dfdc_train_all\\' #todo uncomment this, delete path above
+# all_train_dir = 'E:\\dfdc_train_all\\'
+all_train_dir = 'D:\\Deep_Fake\\dfdc_train_all\\'
 
 # array of all the subdirectories
 vid_sub_dir = [all_train_dir + x for x in os.listdir(all_train_dir)]
@@ -159,8 +159,8 @@ for i in range(1):#todo uncomment above line and delete this one once testing is
             if video == 'metadata.json':
                 shutil.copyfile(test_video_dir + video,  './data/deepfake_jpegs/metadata' + str(i) + '.json')
             start = process_time()
-            # detect_video(video_path=test_video_dir, video_name=video, frames_to_capture=150,
-            #              destination=destination_dir)
+            detect_video(video_path=test_video_dir, video_name=video, frames_to_capture=150,
+                         destination=destination_dir)
             print("total time: ", process_time() - start)
         except Exception as err:
             print(err)
