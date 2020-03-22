@@ -183,7 +183,7 @@ LABELS = ['REAL', 'FAKE']
 val_nums = [47, 48, 49]
 
 # %%
-
+#adapt for our files
 def get_path(num, x):
     num = str(num)
     if len(num) == 2:
@@ -306,7 +306,11 @@ def shuffle(X, y):
 X, y = shuffle(X, y)
 val_X, val_y = shuffle(val_X, val_y)
 # %%
+from keras.applications.inception_v3 import InceptionV3
 
+model_v3 = InceptionV3(include_top=False, weights='imagenet')
+print(model_v3.summary())
+#%%
 def InceptionLayer(a, b, c, d):
     def func(x):
         x1 = Conv2D(a, (1, 1), padding='same', activation='elu')(x)
@@ -357,15 +361,35 @@ def define_model(shape=(256, 256, 3)):
     model.compile(loss='binary_crossentropy', optimizer=Adam(lr=1e-4))
     # model.summary()
     return model
+'''
+#%%
+import keras
+def define_model():
+    model2 = Sequential()
+    model2.add(InceptionV3(include_top=False, weights='imagenet'))
+    model2.add(LSTM(4, return_sequences=True, return_state=True))
+    model2.summary()
+    return model2
 
 
+define_model()
+#%%
+def cnn_lstm():
+    model10 = Sequential()
+    model10.add(Convolution2D(input_shape = 3, filters = 3, kernel_size = 3
+    , activation = 3))
+    model10.add(LSTM(units = 2, ))
+    return model10
+
+cnn_lstm()
+#%%
 df_model = define_model()
 df_model.load_weights('./data/meso-pretrain/MesoInception_DF')
 f2f_model = define_model()
 f2f_model.load_weights('./data/meso-pretrain/MesoInception_F2F')
 
 # %%
-
+'''
 from keras.callbacks import LearningRateScheduler
 
 lrs = [1e-3, 5e-4, 1e-4]
@@ -378,6 +402,17 @@ def schedule(epoch):
 # %%
 
 LOAD_PRETRAIN = False
+
+inputs = model_v3.fit([X], [y], epochs=2, callbacks=[LearningRateScheduler(schedule)])
+lstm = tf.keras.layers.LSTM(4)
+
+output = lstm(inputs)  # The output has shape `[32, 4]`.
+
+lstm = tf.keras.layers.LSTM(4, return_sequences=True, return_state=True)
+
+# whole_sequence_output has shape `[32, 10, 4]`.
+# final_memory_state and final_carry_state both have shape `[32, 4]`.
+whole_sequence_output, final_memory_state, final_carry_state = lstm(inputs)
 
 # %%
 
