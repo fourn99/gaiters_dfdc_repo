@@ -1,3 +1,8 @@
 /data/train_sample_videos/*
 /.idea/*
 .env
+/data/deepfake/
+/notebooks/cnn_full_frame.ipynb
+/data/deepfake.zip
+/data/meso-pretrain.zip
+/data/meso-pretrain/
