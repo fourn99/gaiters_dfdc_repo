@@ -130,7 +130,6 @@ def detect_video(video_path, video_name, frames_to_capture, destination):
 #              destination='D:\\Deep_Fake\\dfdc_train_all_jpegs\\dfdc_train_part_0\\')
 #%%
 # source folder with all videos
-# all_train_dir = 'E:\\dfdc_train_all\\'
 all_train_dir = 'D:\\Deep_Fake\\dfdc_train_all\\'
 
 # array of all the subdirectories
@@ -139,8 +138,7 @@ test_video_files = []
 os.makedirs('./data/deepfake_jpegs', exist_ok=True)
 
 # going through each subdirectory
-# for i in range(len(vid_sub_dir)):
-for i in range(1):#todo uncomment above line and delete this one once testing is done
+for i in range(len(vid_sub_dir)):
     # go inside folder with videos
     test_video_dir = vid_sub_dir[i] + '\\' + str(os.listdir(vid_sub_dir[i])[0]) + '\\'
     # e.g.: test_video_dir[0] -> D:\Deep_Fake\dfdc_train_all\dfdc_train_part_00\dfdc_train_part_0\
