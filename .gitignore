@@ -8,3 +8,5 @@
 /data/meso-pretrain/
 /inception_v3.py
 /data/deepfake_jpegs/*
+/data/sample_submission.csv
+/unzip_script.py
