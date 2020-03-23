@@ -112,62 +112,65 @@ import cv2
 from tqdm import tqdm
 import glob
 from mtcnn import MTCNN
-# %%
+import shutil
 
-sorted(glob.glob('./data/deepfake/meta*'))
 
-# %%
 
-df_train0 = pd.read_json('./data/deepfake/metadata0.json')
-df_train1 = pd.read_json('./data/deepfake/metadata1.json')
-df_train2 = pd.read_json('./data/deepfake/metadata2.json')
-df_train3 = pd.read_json('./data/deepfake/metadata3.json')
-df_train4 = pd.read_json('./data/deepfake/metadata4.json')
-df_train5 = pd.read_json('./data/deepfake/metadata5.json')
-df_train6 = pd.read_json('./data/deepfake/metadata6.json')
-df_train7 = pd.read_json('./data/deepfake/metadata7.json')
-df_train8 = pd.read_json('./data/deepfake/metadata8.json')
-df_train9 = pd.read_json('./data/deepfake/metadata9.json')
-df_train10 = pd.read_json('./data/deepfake/metadata10.json')
-df_train11 = pd.read_json('./data/deepfake/metadata11.json')
-df_train12 = pd.read_json('./data/deepfake/metadata12.json')
-df_train13 = pd.read_json('./data/deepfake/metadata13.json')
-df_train14 = pd.read_json('./data/deepfake/metadata14.json')
-df_train15 = pd.read_json('./data/deepfake/metadata15.json')
-df_train16 = pd.read_json('./data/deepfake/metadata16.json')
-df_train17 = pd.read_json('./data/deepfake/metadata17.json')
-df_train18 = pd.read_json('./data/deepfake/metadata18.json')
-df_train19 = pd.read_json('./data/deepfake/metadata19.json')
-df_train20 = pd.read_json('./data/deepfake/metadata20.json')
-df_train21 = pd.read_json('./data/deepfake/metadata21.json')
-df_train22 = pd.read_json('./data/deepfake/metadata22.json')
-df_train23 = pd.read_json('./data/deepfake/metadata23.json')
-df_train24 = pd.read_json('./data/deepfake/metadata24.json')
-df_train25 = pd.read_json('./data/deepfake/metadata25.json')
-df_train26 = pd.read_json('./data/deepfake/metadata26.json')
-df_train27 = pd.read_json('./data/deepfake/metadata27.json')
-df_train28 = pd.read_json('./data/deepfake/metadata28.json')
-df_train29 = pd.read_json('./data/deepfake/metadata29.json')
-df_train30 = pd.read_json('./data/deepfake/metadata30.json')
-df_train31 = pd.read_json('./data/deepfake/metadata31.json')
-df_train32 = pd.read_json('./data/deepfake/metadata32.json')
-df_train33 = pd.read_json('./data/deepfake/metadata33.json')
-df_train34 = pd.read_json('./data/deepfake/metadata34.json')
-df_train35 = pd.read_json('./data/deepfake/metadata35.json')
-df_train36 = pd.read_json('./data/deepfake/metadata36.json')
-df_train37 = pd.read_json('./data/deepfake/metadata37.json')
-df_train38 = pd.read_json('./data/deepfake/metadata38.json')
-df_train39 = pd.read_json('./data/deepfake/metadata39.json')
-df_train40 = pd.read_json('./data/deepfake/metadata40.json')
-df_train41 = pd.read_json('./data/deepfake/metadata41.json')
-df_train42 = pd.read_json('./data/deepfake/metadata42.json')
-df_train43 = pd.read_json('./data/deepfake/metadata43.json')
-df_train44 = pd.read_json('./data/deepfake/metadata44.json')
-df_train45 = pd.read_json('./data/deepfake/metadata45.json')
-df_train46 = pd.read_json('./data/deepfake/metadata46.json')
-df_val1 = pd.read_json('./data/deepfake/metadata47.json')
-df_val2 = pd.read_json('./data/deepfake/metadata48.json')
-df_val3 = pd.read_json('./data/deepfake/metadata49.json')
+#%%
+
+sorted(glob.glob('./data/deepfake_jpegs/meta*'))
+
+#%%
+df_train0 = pd.read_json('./data/deepfake_jpegs/metadata0.json')
+df_train1 = pd.read_json('./data/deepfake_jpegs/metadata1.json')
+df_train2 = pd.read_json('./data/deepfake_jpegs/metadata2.json')
+df_train3 = pd.read_json('./data/deepfake_jpegs/metadata3.json')
+df_train4 = pd.read_json('./data/deepfake_jpegs/metadata4.json')
+df_train5 = pd.read_json('./data/deepfake_jpegs/metadata5.json')
+df_train6 = pd.read_json('./data/deepfake_jpegs/metadata6.json')
+df_train7 = pd.read_json('./data/deepfake_jpegs/metadata7.json')
+df_train8 = pd.read_json('./data/deepfake_jpegs/metadata8.json')
+df_train9 = pd.read_json('./data/deepfake_jpegs/metadata9.json')
+df_train10 = pd.read_json('./data/deepfake_jpegs/metadata10.json')
+df_train11 = pd.read_json('./data/deepfake_jpegs/metadata11.json')
+df_train12 = pd.read_json('./data/deepfake_jpegs/metadata12.json')
+df_train13 = pd.read_json('./data/deepfake_jpegs/metadata13.json')
+df_train14 = pd.read_json('./data/deepfake_jpegs/metadata14.json')
+df_train15 = pd.read_json('./data/deepfake_jpegs/metadata15.json')
+df_train16 = pd.read_json('./data/deepfake_jpegs/metadata16.json')
+df_train17 = pd.read_json('./data/deepfake_jpegs/metadata17.json')
+df_train18 = pd.read_json('./data/deepfake_jpegs/metadata18.json')
+df_train19 = pd.read_json('./data/deepfake_jpegs/metadata19.json')
+df_train20 = pd.read_json('./data/deepfake_jpegs/metadata20.json')
+df_train21 = pd.read_json('./data/deepfake_jpegs/metadata21.json')
+df_train22 = pd.read_json('./data/deepfake_jpegs/metadata22.json')
+df_train23 = pd.read_json('./data/deepfake_jpegs/metadata23.json')
+df_train24 = pd.read_json('./data/deepfake_jpegs/metadata24.json')
+df_train25 = pd.read_json('./data/deepfake_jpegs/metadata25.json')
+df_train26 = pd.read_json('./data/deepfake_jpegs/metadata26.json')
+df_train27 = pd.read_json('./data/deepfake_jpegs/metadata27.json')
+df_train28 = pd.read_json('./data/deepfake_jpegs/metadata28.json')
+df_train29 = pd.read_json('./data/deepfake_jpegs/metadata29.json')
+df_train30 = pd.read_json('./data/deepfake_jpegs/metadata30.json')
+df_train31 = pd.read_json('./data/deepfake_jpegs/metadata31.json')
+df_train32 = pd.read_json('./data/deepfake_jpegs/metadata32.json')
+df_train33 = pd.read_json('./data/deepfake_jpegs/metadata33.json')
+df_train34 = pd.read_json('./data/deepfake_jpegs/metadata34.json')
+df_train35 = pd.read_json('./data/deepfake_jpegs/metadata35.json')
+df_train36 = pd.read_json('./data/deepfake_jpegs/metadata36.json')
+df_train37 = pd.read_json('./data/deepfake_jpegs/metadata37.json')
+df_train38 = pd.read_json('./data/deepfake_jpegs/metadata38.json')
+df_train39 = pd.read_json('./data/deepfake_jpegs/metadata39.json')
+df_train40 = pd.read_json('./data/deepfake_jpegs/metadata40.json')
+df_train41 = pd.read_json('./data/deepfake_jpegs/metadata41.json')
+df_train42 = pd.read_json('./data/deepfake_jpegs/metadata42.json')
+df_train43 = pd.read_json('./data/deepfake_jpegs/metadata43.json')
+df_train44 = pd.read_json('./data/deepfake_jpegs/metadata44.json')
+df_train45 = pd.read_json('./data/deepfake_jpegs/metadata45.json')
+df_train46 = pd.read_json('./data/deepfake_jpegs/metadata46.json')
+df_val1 = pd.read_json('./data/deepfake_jpegs/metadata47.json')
+df_val2 = pd.read_json('./data/deepfake_jpegs/metadata48.json')
+df_val3 = pd.read_json('./data/deepfake_jpegs/metadata49.json')
 
 df_trains = [df_train0, df_train1, df_train2, df_train3, df_train4,
              df_train5, df_train6, df_train7, df_train8, df_train9, df_train10,
@@ -177,34 +180,43 @@ df_trains = [df_train0, df_train1, df_train2, df_train3, df_train4,
              df_train29, df_train30, df_train31, df_train32, df_train33, df_train34,
              df_train35, df_train36, df_train37, df_train38, df_train39, df_train40,
              df_train41, df_train42, df_train43, df_train44, df_train45, df_train46]
+
 df_vals = [df_val1, df_val2, df_val3]
 nums = list(range(len(df_trains) + 1))
 LABELS = ['REAL', 'FAKE']
 val_nums = [47, 48, 49]
 
-# %%
-#adapt for our files
+
+#%%
+
 def get_path(num, x):
-    num = str(num)
-    if len(num) == 2:
-        path = './data/deepfake/DeepFake' + num + '/DeepFake' + num + '/' + x.replace('.mp4', '') + '.jpg'
-    else:
-        path = './data/deepfake/DeepFake0' + num + '/DeepFake0' + num + '/' + x.replace('.mp4', '') + '.jpg'
+    path = './data/deepfake_jpegs/dfdc_train_part_' + str(num) + '/' + x.replace('.mp4', '_frames')
     if not os.path.exists(path):
         raise Exception
+
+    if not (os.listdir(path)): #if empty delete subdirectory
+        try:
+            shutil.rmtree(p)
+        except Exception as err:
+            print(err)
+            pass
+        return -1
+
     return path
 
-
+# go through all dataframes, add path of video frames to paths and label to y
 paths = []
 y = []
 for df_train, num in tqdm(zip(df_trains, nums), total=len(df_trains)):
     images = list(df_train.columns.values)
     for x in images:
         try:
-            paths.append(get_path(num, x))
-            y.append(LABELS.index(df_train[x]['label']))
+            p = get_path(num, x)
+            if not(p == -1): # if -1 then we didnt capture frames for that video
+                paths.append(p)
+                y.append(LABELS.index(df_train[x]['label']))
         except Exception as err:
-            # print(err)
+            print(err)
             pass
 
 val_paths = []
@@ -213,14 +225,16 @@ for df_val, num in tqdm(zip(df_vals, val_nums), total=len(df_vals)):
     images = list(df_val.columns.values)
     for x in images:
         try:
-            val_paths.append(get_path(num, x))
-            val_y.append(LABELS.index(df_val[x]['label']))
+            p_val = get_path(num, x)
+            if not (p_val == -1):  # if -1 then we didnt capture frames for that video
+                val_paths.append(p_val)
+                val_y.append(LABELS.index(df_val[x]['label']))
         except Exception as err:
             # print(err)
             pass
 
 # %%
-# Apply Underbalancing Techinique
+
 print('There are ' + str(y.count(1)) + ' fake train samples')
 print('There are ' + str(y.count(0)) + ' real train samples')
 print('There are ' + str(val_y.count(1)) + ' fake val samples')
@@ -228,7 +242,7 @@ print('There are ' + str(val_y.count(0)) + ' real val samples')
 
 
 # %%
-
+# Apply Underbalancing Techinique
 import random
 
 real = []
@@ -265,15 +279,16 @@ for x in fake:
     val_paths.append(x)
     val_y.append(1)
 
-# %%
 
+# %%
+# Apply Underbalancing Techinique
 print('There are ' + str(y.count(1)) + ' fake train samples')
 print('There are ' + str(y.count(0)) + ' real train samples')
 print('There are ' + str(val_y.count(1)) + ' fake val samples')
 print('There are ' + str(val_y.count(0)) + ' real val samples')
 
 
-# %%
+#%%
 
 def read_img(path):
     return cv2.cvtColor(cv2.imread(path), cv2.COLOR_BGR2RGB)
