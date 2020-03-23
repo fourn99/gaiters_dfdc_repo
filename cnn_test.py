@@ -196,7 +196,7 @@ def get_path(num, x):
 
     if not (os.listdir(path)): #if empty delete subdirectory
         try:
-            shutil.rmtree(p)
+            shutil.rmtree(path)
         except Exception as err:
             print(err)
             pass
@@ -260,7 +260,11 @@ for x in real:
 for x in fake:
     paths.append(x)
     y.append(1)
-
+#%%
+print('There are ' + str(y.count(1)) + ' fake train samples')
+print('There are ' + str(y.count(0)) + ' real train samples')
+print('There are ' + str(val_y.count(1)) + ' fake val samples')
+print('There are ' + str(val_y.count(0)) + ' real val samples')
 # %%
 
 real = []
@@ -289,7 +293,8 @@ print('There are ' + str(val_y.count(0)) + ' real val samples')
 
 
 #%%
-
+#TODO: need to give path to jpegs and not dir; tbd input learning model
+#
 def read_img(path):
     return cv2.cvtColor(cv2.imread(path), cv2.COLOR_BGR2RGB)
 
@@ -376,18 +381,24 @@ def define_model(shape=(256, 256, 3)):
     model.compile(loss='binary_crossentropy', optimizer=Adam(lr=1e-4))
     # model.summary()
     return model
-'''
+
 #%%
-import keras
+from keras.applications.inception_v3 import InceptionV3
+model_v3 = InceptionV3(include_top=False, weights='imagenet')
 def define_model():
-    model2 = Sequential()
+    #Keras LSTM takes and input with shape of (n_examples, n_times, n_features) and your layers input has to have this shape
+    #You will have to put return_sequences=True for the second LSTM layer as well
+    model2 = keras.Sequential()
     model2.add(InceptionV3(include_top=False, weights='imagenet'))
-    model2.add(LSTM(4, return_sequences=True, return_state=True))
+    model2.summary()
+    model2.add(LSTM(50, activation="relu", return_sequences=True))
     model2.summary()
     return model2
 
 
 define_model()
+#%%
+'''
 #%%
 def cnn_lstm():
     model10 = Sequential()
