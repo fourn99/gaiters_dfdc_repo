@@ -10,4 +10,4 @@
 /data/deepfake_jpegs/*
 /data/sample_submission.csv
 /unzip_script.py
-/data/deepfake_features/
+/preprossesing_test.py
