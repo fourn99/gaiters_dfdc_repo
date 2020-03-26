@@ -1,103 +1,3 @@
-# %%
-from mtcnn import MTCNN
-import tqdm
-import datetime
-import smtplib
-import os
-import cv2
-import numpy as np
-import sys
-import shutil
-'''
-# d_num = sys.argv[1]
-# if len(d_num) == 1:
-#     a_num = d_num
-#     d_num = '0' + d_num
-# else:
-#     a_num = d_num
-detector = MTCNN()
-
-
-def detect_face(img):
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    final = []
-    detected_faces_raw = detector.detect_faces(img)
-    if detected_faces_raw == []:
-        # print('no faces found')
-        return []
-    confidences = []
-    for n in detected_faces_raw:
-        x, y, w, h = n['box']
-        final.append([x, y, w, h])
-        confidences.append(n['confidence'])
-    if max(confidences) < 0.7:
-        return []
-    max_conf_coord = final[confidences.index(max(confidences))]
-    # return final
-    return max_conf_coord
-
-
-def crop(img, x, y, w, h):
-    x -= 40
-    y -= 40
-    w += 80
-    h += 80
-    if x < 0:
-        x = 0
-    if y <= 0:
-        y = 0
-    return cv2.cvtColor(cv2.resize(img[y:y + h, x:x + w], (256, 256)), cv2.COLOR_BGR2RGB)
-
-
-def detect_video(video):
-    v_cap = cv2.VideoCapture(video)
-    v_cap.set(1, NUM_FRAME)
-    success, vframe = v_cap.read()
-    vframe = cv2.cvtColor(vframe, cv2.COLOR_BGR2RGB)
-    bounding_box = detect_face(vframe)
-    if bounding_box == []:
-        count = 0
-        current = NUM_FRAME
-        while bounding_box == [] and count < MAX_SKIP:
-            current += 1
-            v_cap.set(1, current)
-            success, vframe = v_cap.read()
-            vframe = cv2.cvtColor(vframe, cv2.COLOR_BGR2RGB)
-            bounding_box = detect_face(vframe)
-            count += 1
-        if bounding_box == []:
-            print('hi')
-            return None
-    x, y, w, h = bounding_box
-    v_cap.release()
-    return crop(vframe, x, y, w, h)
-
-# D:\Deep_Fake\dfdc_train_all
-
-test_dir = './dfdc_train_part_' + a_num + '/'
-test_video_files = [test_dir + x for x in os.listdir(test_dir)]
-os.makedirs('./DeepFake' + d_num,exist_ok=True)
-MAX_SKIP = 10
-NUM_FRAME = 150
-count = 0
-print(test_dir)
-
-for video in tqdm.tqdm(test_video_files):
-    try:
-        if video=='./dfdc_train_part_'+a_num+'/metadata.json':
-            shutil.copyfile(video,'./metadata'+str(a_num)+'.json')
-        img_file=detect_video(video)
-        os.remove(video)
-        if img_file is None:
-            count+=1
-            continue
-        cv2.imwrite('./DeepFake'+d_num+'/'+video.replace('.mp4','').replace(test_dir,'')+'.jpg',img_file)
-    except Exception as err:
-      print(err)
-'''
-#todo Implement Face extraction code from lee & manel; save as jpegs
-
-# %%
 
 import pandas as pd
 import keras
@@ -118,10 +18,10 @@ import shutil
 
 #%%
 
-sorted(glob.glob('./data/deepfake_jpegs/meta*'))
+list_meta = sorted(glob.glob('./data/deepfake_jpegs/meta*'))
 
 #%%
-df_train0 = pd.read_json('./data/deepfake_jpegs/metadata0.json')
+df_train0 = pd.read_json(list_meta[0])
 df_train1 = pd.read_json('./data/deepfake_jpegs/metadata1.json')
 df_train2 = pd.read_json('./data/deepfake_jpegs/metadata2.json')
 df_train3 = pd.read_json('./data/deepfake_jpegs/metadata3.json')
@@ -186,7 +86,6 @@ nums = list(range(len(df_trains) + 1))
 LABELS = ['REAL', 'FAKE']
 val_nums = [47, 48, 49]
 
-
 #%%
 
 def get_path(num, x):
@@ -199,7 +98,6 @@ def get_path(num, x):
             shutil.rmtree(path)
         except Exception as err:
             print(err)
-            pass
         return -1
 
     return path
@@ -216,7 +114,7 @@ for df_train, num in tqdm(zip(df_trains, nums), total=len(df_trains)):
                 paths.append(p)
                 y.append(LABELS.index(df_train[x]['label']))
         except Exception as err:
-            print(err)
+            # print(err)
             pass
 
 val_paths = []
@@ -325,11 +223,7 @@ def shuffle(X, y):
 
 X, y = shuffle(X, y)
 val_X, val_y = shuffle(val_X, val_y)
-# %%
-from keras.applications.inception_v3 import InceptionV3
 
-model_v3 = InceptionV3(include_top=False, weights='imagenet')
-print(model_v3.summary())
 #%%
 def InceptionLayer(a, b, c, d):
     def func(x):
@@ -383,31 +277,39 @@ def define_model(shape=(256, 256, 3)):
     return model
 
 #%%
-from keras.applications.inception_v3 import InceptionV3
-model_v3 = InceptionV3(include_top=False, weights='imagenet')
-def define_model():
-    #Keras LSTM takes and input with shape of (n_examples, n_times, n_features) and your layers input has to have this shape
-    #You will have to put return_sequences=True for the second LSTM layer as well
-    model2 = keras.Sequential()
-    model2.add(InceptionV3(include_top=False, weights='imagenet'))
-    model2.summary()
-    model2.add(LSTM(50, activation="relu", return_sequences=True))
-    model2.summary()
-    return model2
+
+from keras.applications.inception_v3 import InceptionV3, preprocess_input
+from keras.models import Model, load_model
+from keras.layers import Input
+import numpy as np
 
 
-define_model()
+# Keras LSTM takes and input with shape of (n_examples, n_times, n_features) and your layers input has to have this shape
+# You will have to put return_sequences=True for the second LSTM layer as well
+
+def define_model_incep_lstm(im_shape=(299, 299, 3)):
+
+    input_layer = Input(shape=im_shape)  # Inception V3 requires shape 299x299x3
+    base_mdl = InceptionV3(input_tensor=input_layer, weights='imagenet', include_top=True)
+    # extract feetures at last pooling layer
+    mdl = keras.Model(inputs=base_mdl.input, outputs=base_mdl.get_layer('avg_pool').output)
+
+    return mdl
+
+
+new_model = define_model_incep_lstm()
+print(new_model.summary())
 #%%
-'''
-#%%
-def cnn_lstm():
-    model10 = Sequential()
-    model10.add(Convolution2D(input_shape = 3, filters = 3, kernel_size = 3
-    , activation = 3))
-    model10.add(LSTM(units = 2, ))
-    return model10
+#
+# def cnn_lstm():
+#     model10 = Sequential()
+#     model10.add(Convolution2D(input_shape = 3, filters = 3, kernel_size = 3
+#     , activation = 3))
+#     model10.add(LSTM(units = 2, ))
+#     return model10
+#
+# cnn_lstm()
 
-cnn_lstm()
 #%%
 df_model = define_model()
 df_model.load_weights('./data/meso-pretrain/MesoInception_DF')
@@ -415,7 +317,7 @@ f2f_model = define_model()
 f2f_model.load_weights('./data/meso-pretrain/MesoInception_F2F')
 
 # %%
-'''
+
 from keras.callbacks import LearningRateScheduler
 
 lrs = [1e-3, 5e-4, 1e-4]
@@ -429,16 +331,17 @@ def schedule(epoch):
 
 LOAD_PRETRAIN = False
 
-inputs = model_v3.fit([X], [y], epochs=2, callbacks=[LearningRateScheduler(schedule)])
-lstm = tf.keras.layers.LSTM(4)
-
-output = lstm(inputs)  # The output has shape `[32, 4]`.
-
-lstm = tf.keras.layers.LSTM(4, return_sequences=True, return_state=True)
-
-# whole_sequence_output has shape `[32, 10, 4]`.
-# final_memory_state and final_carry_state both have shape `[32, 4]`.
-whole_sequence_output, final_memory_state, final_carry_state = lstm(inputs)
+#%%
+# inputs = model_v3.fit([X], [y], epochs=2, callbacks=[LearningRateScheduler(schedule)])
+# lstm = tf.keras.layers.LSTM(4)
+#
+# output = lstm(inputs)  # The output has shape `[32, 4]`.
+#
+# lstm = tf.keras.layers.LSTM(4, return_sequences=True, return_state=True)
+#
+# # whole_sequence_output has shape `[32, 10, 4]`.
+# # final_memory_state and final_carry_state both have shape `[32, 4]`.
+# whole_sequence_output, final_memory_state, final_carry_state = lstm(inputs)
 
 # %%
 
@@ -507,15 +410,6 @@ else:
         i += 1
 
 # %%
-#
-# Explanation: Because  of the smaller smaller input size, this code:
-# ```
-# for new_layer, layer in zip(model.layers[1:-8], f2f_model.layers[1:-8]):
-#     new_layer.set_weights(layer.get_weights())
-# ```
-# fetches only the conv layers weight and apply it onto our model
-#
-# %%
 def prediction_pipline(X, two_times=False):
     preds = []
     for model in tqdm(models):
@@ -539,7 +433,6 @@ best_model_pred = models[losses.index(min(losses))].predict([val_X])
 # create procedure to getweights of best model and save them
 
 # %%
-
 model_pred = prediction_pipline(val_X)
 
 # %%
