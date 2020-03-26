@@ -139,7 +139,7 @@ def video_to_frames(frames_interval):
         destination_dir_features = './data/deepfake_features/' + str(os.listdir(vid_sub_dir[i])[0]) + '/'
 
         # for each video in the training subdirectory
-        for video in tqdm(test_video_files):
+        for video in tqdm(test_video_files[0:2]):
             #print(video)
             try:
                 if video == 'metadata.json':
@@ -160,21 +160,31 @@ def video_to_frames(frames_interval):
                 # print("total time: ", process_time() - start)
             except Exception as err:
                 print(err)
-
-
 def get_path(num, x):
-    path = './data/deepfake_jpegs/dfdc_train_part_' + str(num) + '/' + x.replace('.mp4', '_frames')
+
+    num = str(num)
+    if len(num) == 2:
+        path = './data/deepfake/DeepFake' + num + '/DeepFake' + num + '/' + x
+    else:
+        path = './data/deepfake/DeepFake0' + num + '/DeepFake0' + num + '/' + x
     if not os.path.exists(path):
         raise Exception
-
-    if not (os.listdir(path)): #if empty delete subdirectory
-        try:
-            shutil.rmtree(path)
-        except Exception as err:
-            print(err)
-        return -1
-
     return path
+
+
+# def get_path(num, x):
+#     path = './data/deepfake_jpegs/dfdc_train_part_' + str(num) + '/' + x.replace('.mp4', '_frames')
+#     if not os.path.exists(path):
+#         raise Exception
+#
+#     if not (os.listdir(path)): #if empty delete subdirectory
+#         try:
+#             shutil.rmtree(path)
+#         except Exception as err:
+#             print(err)
+#         return -1
+#
+#     return path
 
 
 def preprocessing():
@@ -273,11 +283,13 @@ def preprocessing():
     print('There are ' + str(val_y.count(0)) + ' real val samples')
 
     #  go throught all frames and convert img into array
+
+    #TODO modify
     from keras.preprocessing.image import load_img, img_to_array
-    def read_img(path):
-        img = load_img(path, target_size=(299, 299))
-        img = img_to_array(img)
-        return img.reshape((1, img.shape[0], img.shape[1], img.shape[2]))
+    # def read_img(path):
+    #     img = load_img(path, target_size=(299, 299))
+    #     img = img_to_array(img)
+    #     return img.reshape((1, img.shape[0], img.shape[1], img.shape[2]))
 
     X = []  # input array for model
     for img in tqdm(paths):
