@@ -37,6 +37,30 @@ def image_face_detector(image, net):
     for i in range(0, len(detections)):
         box = detections[i, 3:7] * np.array([w, h, w, h])
         (startX, startY, endX, endY) = box.astype("int")
+        face_w = endX - startX
+        face_h = endY - startY
+        if face_w != 299:
+            offset = (299 - face_w)/2
+            if startX - offset < 0:
+                startX = 0
+                endX = 299
+            elif endX + offset > w:
+                startX = w - 299
+                endX = w
+            else:
+                startX = startX - offset
+                endX = endX + offset
+        if face_h != 299:
+            offset = (299 - face_h)/2
+            if startY - offset < 0:
+                startY = 0
+                endY = 299
+            elif endY + offset > h:
+                startY = h - 299
+                endX = h
+            else:
+                startY = startY - offset
+                endY = endY + offset
         face_detection_coordinates.append(((startX, startY), (endX, endY)))
     return face_detection_coordinates
 
@@ -48,19 +72,27 @@ def detect_video(video_path, video_name, frames_to_capture, destination, net_ogj
     video_name = video_name.replace('.mp4', '')
     os.makedirs(destination + video_name + '_frames' + '\\', exist_ok=True)
     list_frames = []
+   # j = 0
     while True:
         ret, cap = vid.read()  # Capture frame-by-frame
         if cap is not None:
             # number of faces detected in frame
+
             cr = image_face_detector(cap, net_ogj)
             for i in range(len(cr)):
+
                 frame = cap[int(cr[i][0][1]): int(cr[i][1][1]), int(cr[i][0][0]):int(cr[i][1][0])]
                 list_frames.append(frame)
-                cv2.imwrite(destination + video_name + '_frames' + '\\' + video_name + "_cropped_frame_%d.jpg" % i,
-                            frame)
+
+               # cv2.resize(frame, (299, 299))
+
+               # cv2.imwrite(destination + video_name + '_frames' + '\\' + video_name + "_cropped_frame_%d.jpg" % j,
+                    #       frame)
+               # j+=1
 
                 # sets nect frame to the 30th next frame
             count += frames_to_capture
+            #print(count)
             vid.set(1, count)
 
         else:
@@ -81,15 +113,17 @@ def video_to_frames(frames_interval):
     vid_sub_dir = [all_train_dir + x for x in os.listdir(all_train_dir)]
     test_video_files = []
     os.makedirs('./data/deepfake_jpegs', exist_ok=True)
+    os.makedirs('./data/deepfake_features', exist_ok=True)
 
     # Inception V3 model for feature extraction
-    base_mdl = InceptionV3(input_shape=(299,299,3), weights='imagenet', include_top=False)
+    base_mdl = InceptionV3(input_shape=(299,299,3), weights='imagenet', include_top=True)
     # only use model up to last avg_pool
     mdl = Model(inputs=base_mdl.input, outputs=base_mdl.get_layer('avg_pool').output)  # output size (None, 2048)
 
     # going through each subdirectory
     for i in range(len(vid_sub_dir)):
         # go inside folder with videos
+    #for i in range(1):
         test_video_dir = vid_sub_dir[i] + '\\' + str(os.listdir(vid_sub_dir[i])[0]) + '\\'
         # e.g.: test_video_dir[0] -> D:\Deep_Fake\dfdc_train_all\dfdc_train_part_00\dfdc_train_part_0\
 
@@ -106,11 +140,14 @@ def video_to_frames(frames_interval):
 
         # for each video in the training subdirectory
         for video in tqdm(test_video_files):
+            #print(video)
             try:
                 if video == 'metadata.json':
                     shutil.copyfile(test_video_dir + video, './data/deepfake_jpegs/metadata' + str(i) + '.json')
                 # start = process_time()
                 frames = detect_video(video_path=test_video_dir, video_name=video, frames_to_capture=frames_interval, destination=destination_dir, net_ogj=net)
+                video = video.replace('.mp4', '')
+                os.makedirs(destination_dir_features + video + '_features/', exist_ok=True)
                 # create inpute sequence for LSTM to use later on
                 sequence = []
                 for img in frames:
@@ -119,7 +156,7 @@ def video_to_frames(frames_interval):
                     features = mdl.predict(x)
                     sequence.append(features)
 
-                np.save(destination_dir_features + video + '_features', sequence)
+                np.save(destination_dir_features + video + '_features/' + video, sequence)
                 # print("total time: ", process_time() - start)
             except Exception as err:
                 print(err)
