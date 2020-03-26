@@ -98,8 +98,11 @@ def video_to_frames(frames_interval):
 
         # makes directory for the subdirectory of the training video
         os.makedirs('./data/deepfake_jpegs/' + str(os.listdir(vid_sub_dir[i])[0]), exist_ok=True)
+        os.makedirs('./data/deepfake_features/'+ str(os.listdir(vid_sub_dir[i])[0]), exist_ok=True)
         # get directory name of the directory just made
         destination_dir = './data/deepfake_jpegs/' + str(os.listdir(vid_sub_dir[i])[0]) + '/'
+
+        destination_dir_features = './data/deepfake_features/' + str(os.listdir(vid_sub_dir[i])[0]) + '/'
 
         # for each video in the training subdirectory
         for video in tqdm(test_video_files):
@@ -116,7 +119,7 @@ def video_to_frames(frames_interval):
                     features = mdl.predict(x)
                     sequence.append(features)
 
-                np.save(destination_dir + video + "_frames\\" + video + '_features', sequence)
+                np.save(destination_dir_features + video + '_features', sequence)
                 # print("total time: ", process_time() - start)
             except Exception as err:
                 print(err)
