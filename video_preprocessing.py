@@ -112,7 +112,7 @@ def detect_video(video_path, video_name, frames_to_capture, destination):
                     # writes cropped image of frame, with 25 pixel border
                     # [d.top() - 25:d.bottom() + 25, d.left() - 25:d.right() + 25]
                     '''
-                cv2.imwrite(destination + video_name + '_frames' + '\\' + video_name + "_cropped_frame_%d.jpg" % count, frame)
+                cv2.imwrite(destination + video_name + '_frames' + '\\' + video_name + "_cropped_frame_%d.jpg" % i, frame)
                     # cv2.imwrite(destination + '\\' + video_name + "_cropped_frame_%d.jpg" % count, frame)
 
                 # sets nect frame to the 30th next frame
@@ -123,11 +123,6 @@ def detect_video(video_path, video_name, frames_to_capture, destination):
             vid.release()
             break
 
-# this video has nothing being capture... to INVESTIGATE
-# detect_video(video_path='D:\\Deep_Fake\\dfdc_train_all\\dfdc_train_part_00\\dfdc_train_part_0\\',
-#              video_name='abhggqdift.mp4',
-#              frames_to_capture=30,
-#              destination='D:\\Deep_Fake\\dfdc_train_all_jpegs\\dfdc_train_part_0\\')
 #%%
 # source folder with all videos
 all_train_dir = 'D:\\Deep_Fake\\dfdc_train_all\\'
@@ -156,10 +151,10 @@ for i in range(len(vid_sub_dir)):
         try:
             if video == 'metadata.json':
                 shutil.copyfile(test_video_dir + video,  './data/deepfake_jpegs/metadata' + str(i) + '.json')
-            start = process_time()
-            detect_video(video_path=test_video_dir, video_name=video, frames_to_capture=150,
+            # start = process_time()
+            detect_video(video_path=test_video_dir, video_name=video, frames_to_capture=25,
                          destination=destination_dir)
-            print("total time: ", process_time() - start)
+            # print("total time: ", process_time() - start)
         except Exception as err:
             print(err)
 
