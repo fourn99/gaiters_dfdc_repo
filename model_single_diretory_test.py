@@ -202,21 +202,6 @@ def extract_features(sample_count, im_shape=(299,299,3)):
 model_incept = extract_features(300)
 print(model_incept.summary())
 
-#%%
-
-def define_model_incep_lstm(im_shape=(299, 299, 3)):
-
-    list_features, list_labels, mdl_incep = extract_features(sample_count=200 ,im_shape)
-
-    learning_model = Sequential()
-    learning_model.add(LSTM(200, input_shape=(80,256)))  #input_shape = sequence length, feature vector length
-    learning_model.add(Dense(2, activation='softmax'))
-
-    return learning_model
-
-
-new_model = define_model_incep_lstm()
-print(new_model.summary())
 
 #%%
 # df_model = define_model()

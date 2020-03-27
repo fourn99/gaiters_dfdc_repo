@@ -11,3 +11,4 @@
 /data/sample_submission.csv
 /unzip_script.py
 /preprossesing_test.py
+/data/deepfake_features/*
