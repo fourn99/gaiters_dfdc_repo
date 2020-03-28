@@ -205,6 +205,7 @@ def get_path_videos(subdir_num, video_name):
         # raise Exception
     return path
 
+
 def preprocessing(metadata_dir):
     # -- get metadata
     df_train0 = pd.read_json(metadata_dir + 'metadata0.json')
@@ -307,6 +308,16 @@ def preprocessing(metadata_dir):
             except Exception as err:
                 # print(err)
                 pass
+
+    return balancing(paths, y, val_paths, val_y)
+
+
+def balancing(train_paths, train_labels, valid_paths, valid_labels):
+
+    paths = train_paths
+    y = train_labels
+    val_paths = valid_paths
+    val_y = valid_labels
 
     print('There are ' + str(y.count(1)) + ' fake train samples')
     print('There are ' + str(y.count(0)) + ' real train samples')
@@ -452,7 +463,7 @@ def train(model, X, y, val_X, val_y):
         loss = log_loss(val_y, pred)
         losses.append(loss)
         print('fold ' + str(i) + ' model loss: ' + str(loss))
-        if loss < 0.68:
+        if loss < 0.5:
             models.append(model)
         else:
             print('loss too bad, retrain!')
@@ -501,6 +512,7 @@ def correct_precentile(pred, real):
         round(incorrect / len(real) * 100, 1)) + '% incorrect')
 
 
+
 def main():
 
     # 1) get metadata of videos, split into train - validation sets, returns paths and labels
@@ -509,69 +521,78 @@ def main():
     # 2) go through videos and save jpegs - Create feature vector with inception v3 in feature directory
     vids_to_delete = video_to_frames(25, videos_path, videos_label, valid_videos_path, valid_videos_labels)
 
+
     # 3) get feature vectors for train and validation sets
     X, y, val_X, val_y = get_feature_vector()
 
-    #todo probably need to rebalance again after deleteting dir with less the 12 feature vector
+    # 4) Balancing
+    X, y, val_X, val_y = balancing(X, y, val_X, val_y)
 
-    # # 4) train model (LSTM) on feature vector
-    # lstm = define_model_lstm()
-    # list_models, list_losses = train(lstm, X, y, val_X, val_y)
-    #
-    # best_model_pred = list_models[list_losses.index(min(list_losses))].predict([val_X])
-    #
-    # template code to save model and weigth in json format
+    # 5) train model (LSTM) on feature vector
+    lstm = define_model_lstm()
+    list_models, list_losses = train(lstm, X, y, val_X, val_y)
+
+    # 6) predict validation set
+    best_model_pred = list_models[list_losses.index(min(list_losses))].predict([val_X])
+    best_model = list_models[list_losses.index(min(list_losses))]
+    model_pred = prediction_pipline(val_X, [best_model])
+
+    # 7) Check performance of models
+    random_pred = np.random.random(len(val_X))
+    print('random loss: ' + str(log_loss(val_y, random_pred.clip(0.35, 0.65))))
+    allone_pred = np.array([1 for _ in range(len(val_X))])
+    print('1 loss: ' + str(log_loss(val_y, allone_pred)))
+    allzero_pred = np.array([0 for _ in range(len(val_X))])
+    print('0 loss: ' + str(log_loss(val_y, allzero_pred)))
+    allpoint5_pred = np.array([0.5 for _ in range(len(val_X))])
+    print('0.5 loss: ' + str(log_loss(val_y, allpoint5_pred)))
+
+    print('Simple Averaging Loss: ' + str(log_loss(val_y, model_pred.clip(0.35, 0.65))))
+    print(
+        'Two Times Larger Range(Averaging) Loss: ' + str(log_loss(val_y, larger_range(model_pred, 2).clip(0.35, 0.65))))
+    print('Best Single Model Loss: ' + str(log_loss(val_y, best_model_pred.clip(0.35, 0.65))))
+    print('Two Times Larger Range(Single Model) Loss: ' + str(
+        log_loss(val_y, larger_range(best_model_pred, 2).clip(0.35, 0.65))))
+
+    if log_loss(val_y, model_pred.clip(0.35, 0.65)) < log_loss(val_y, larger_range(model_pred, 2).clip(0.35, 0.65)):
+        two_times = False
+        print('simple averaging is better')
+    else:
+        two_times = True
+        print('two times larger range is better')
+    two_times = False  # This is not a bug. I did this intentionally because the model can't get most of the private validation set right(based on LB)
+
+    import scipy
+
+    print(model_pred.clip(0.35, 0.65).mean())
+    print(scipy.stats.median_absolute_deviation(model_pred.clip(0.35, 0.65))[0])
+
+    check_answers(model_pred, val_y, 15)
+    correct_precentile(model_pred, val_y)
+
+    # 8) save models and weights
+    model_json = best_model.to_json()
+    with open("best_model.json", "w") as json_file:
+        json_file.write(model_json)
+        # serialize weights to HDF5
+    best_model.save_weights("best_model_weights.h5")
+    print("Saved best model to disk")
+    json_file.close()
+
+    # 8) save models and weights
     # serialize model to JSON
-    # model_json = best_model_pred.to_json()
-    # with open("model.json", "w") as json_file:
-    #     json_file.write(model_json)
-    # # serialize weights to HDF5
-    # model.save_weights("model.h5")
-    # print("Saved model to disk")
-    # Template code to read a saved model and saved weights
-    # load json and create model
-    # json_file = open('model.json', 'r')
-    # loaded_model_json = json_file.read()
-    # json_file.close()
-    # loaded_model = model_from_json(loaded_model_json)
-    # # load weights into new model
-    # loaded_model.load_weights("model.h5")
-    # print("Loaded model from disk")
+    from keras.models import model_from_json
+    # i = 0
+    # for model in tqdm(list_models):
     #
-    # model_pred = prediction_pipline(val_X, list_models)
-    #
-    # random_pred = np.random.random(len(val_X))
-    # print('random loss: ' + str(log_loss(val_y, random_pred.clip(0.35, 0.65))))
-    # allone_pred = np.array([1 for _ in range(len(val_X))])
-    # print('1 loss: ' + str(log_loss(val_y, allone_pred)))
-    # allzero_pred = np.array([0 for _ in range(len(val_X))])
-    # print('0 loss: ' + str(log_loss(val_y, allzero_pred)))
-    # allpoint5_pred = np.array([0.5 for _ in range(len(val_X))])
-    # print('0.5 loss: ' + str(log_loss(val_y, allpoint5_pred)))
-    #
-    # print('Simple Averaging Loss: ' + str(log_loss(val_y, model_pred.clip(0.35, 0.65))))
-    # print(
-    #     'Two Times Larger Range(Averaging) Loss: ' + str(log_loss(val_y, larger_range(model_pred, 2).clip(0.35, 0.65))))
-    # print('Best Single Model Loss: ' + str(log_loss(val_y, best_model_pred.clip(0.35, 0.65))))
-    # print('Two Times Larger Range(Single Model) Loss: ' + str(
-    #     log_loss(val_y, larger_range(best_model_pred, 2).clip(0.35, 0.65))))
-    # if log_loss(val_y, model_pred.clip(0.35, 0.65)) < log_loss(val_y, larger_range(model_pred, 2).clip(0.35, 0.65)):
-    #     two_times = False
-    #     print('simple averaging is better')
-    # else:
-    #     two_times = True
-    #     print('two times larger range is better')
-    # two_times = False  # This is not a bug. I did this intentionally because the model can't get most of the private validation set right(based on LB)
-    #
-    # import scipy
-    #
-    # print(model_pred.clip(0.35, 0.65).mean())
-    # print(scipy.stats.median_absolute_deviation(model_pred.clip(0.35, 0.65))[0])
-    #
-    # check_answers(model_pred, val_y, 15)
-    # correct_precentile(model_pred, val_y)
-    #
-    # #todo implement test procedure
+    #     model_json = model.to_json()
+    #     with open("./models/model_%d.json" % i, "w") as json_file:
+    #         json_file.write(model_json)
+    #         # serialize weights to HDF5
+    #     model.save_weights("./weights/model_%d.h5" % i)
+    #     print("Saved model " + str(i) + " to disk")
+    #     json_file.close()
+
 
 
 if __name__ == "__main__":
