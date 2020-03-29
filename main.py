@@ -103,8 +103,8 @@ def video_to_frames(frames_interval, train_videos, train_labels, valid_videos, v
     net = cv2.dnn.readNetFromCaffe('./deploy.prototxt.txt', './res10_300x300_ssd_iter_140000.caffemodel')
     # source folder with all videos
 
-    # all_train_dir = 'D:\\Deep_Fake\\dfdc_train_all\\'
-    all_train_dir = 'E:\\dfdc_train_all\\'
+    all_train_dir = 'D:\\Deep_Fake\\dfdc_train_all\\'
+    #all_train_dir = 'E:\\dfdc_train_all\\'
 
     # array of all the subdirectories
     vid_sub_dir = [all_train_dir + x for x in os.listdir(all_train_dir)]
@@ -194,10 +194,10 @@ def get_path_videos_nic_computer(subdir_num, video_name):
 
 def get_path_videos(subdir_num, video_name):
     if subdir_num < 10:
-        path = 'E:\\dfdc_train_all\\dfdc_train_part_0' + str(subdir_num) + '\\' + 'dfdc_train_part_' + str(
+        path = 'D:\\Deep_Fake\\dfdc_train_all\\dfdc_train_part_0' + str(subdir_num) + '\\' + 'dfdc_train_part_' + str(
             subdir_num) + '\\' + video_name
     else:
-        path = 'E:\\dfdc_train_all\\dfdc_train_part_' + str(subdir_num) + '\\' + 'dfdc_train_part_' + str(
+        path = 'D:\\Deep_Fake\\dfdc_train_all\\dfdc_train_part_' + str(subdir_num) + '\\' + 'dfdc_train_part_' + str(
             subdir_num) + '\\' + video_name
 
     if not os.path.exists(path):
@@ -334,7 +334,7 @@ def balancing(train_paths, train_labels, valid_paths, valid_labels):
             real.append(m)
         else:
             fake.append(m)
-    fake = random.sample(fake, len(real))
+    fake = random.sample(real, len(fake))
     paths, y = [], []
     for x in real:
         paths.append(x)
@@ -357,7 +357,7 @@ def balancing(train_paths, train_labels, valid_paths, valid_labels):
             real.append(m)
         else:
             fake.append(m)
-    fake = random.sample(fake, len(real))
+    fake = random.sample(real, len(fake))
     val_paths, val_y = [], []
     for x in real:
         val_paths.append(x)
@@ -458,8 +458,8 @@ def train(model, X, y, val_X, val_y):
         model = define_model_lstm()
         if i == 0:
             model.summary()
-        model.fit([X], [y], epochs=2, callbacks=[LearningRateScheduler(schedule)])
-        pred = model.predict([val_X])
+        model.fit(X, y, epochs=2, callbacks=[LearningRateScheduler(schedule)])
+        pred = model.predict(val_X)
         loss = log_loss(val_y, pred)
         losses.append(loss)
         print('fold ' + str(i) + ' model loss: ' + str(loss))
@@ -516,21 +516,46 @@ def correct_precentile(pred, real):
 def main():
 
     # 1) get metadata of videos, split into train - validation sets, returns paths and labels
-    videos_path, videos_label, valid_videos_path, valid_videos_labels = preprocessing('E:\\dfdc_train_all\\')
+    #videos_path, videos_label, valid_videos_path, valid_videos_labels = preprocessing('E:\\dfdc_train_all\\')
 
     # 2) go through videos and save jpegs - Create feature vector with inception v3 in feature directory
-    vids_to_delete = video_to_frames(25, videos_path, videos_label, valid_videos_path, valid_videos_labels)
+    #vids_to_delete = video_to_frames(25, videos_path, videos_label, valid_videos_path, valid_videos_labels)
 
 
     # 3) get feature vectors for train and validation sets
     X, y, val_X, val_y = get_feature_vector()
 
     # 4) Balancing
-    X, y, val_X, val_y = balancing(X, y, val_X, val_y)
+    #X, y, val_X, val_y = balancing(X, y, val_X, val_y)
+    # %%
+    count = 0
+    x_train, y_train = [], []
+    for i in range(len(X)):
+        temp = X[i]
+        if X[i].shape[0] > 12:
+            continue
+        else:
+            y_train.append(y[i])
+            for j in range(len(temp)):
+                temp_1 = temp[j]
+                for k in range(len(temp_1)):
+                    x_train.append(X[i][j][k])
+
+    x_val, y_val = [], []
+    for i in range(len(val_X)):
+        temp = val_X[i]
+        if val_X[i].shape[0] > 12:
+            continue
+        else:
+            y_val.append(val_y[i])
+            for j in range(len(temp)):
+                temp_1 = temp[j]
+                for k in range(len(temp_1)):
+                    x_val.append(val_X[i][j][k])
 
     # 5) train model (LSTM) on feature vector
     lstm = define_model_lstm()
-    list_models, list_losses = train(lstm, X, y, val_X, val_y)
+    list_models, list_losses = train(lstm, x_train, y_train, x_val, y_val)
 
     # 6) predict validation set
     best_model_pred = list_models[list_losses.index(min(list_losses))].predict([val_X])

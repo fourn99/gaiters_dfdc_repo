@@ -9,6 +9,7 @@ from keras.layers import *
 from keras.optimizers import *
 from sklearn.model_selection import train_test_split
 import cv2
+import dlib
 from tqdm import tqdm
 import glob
 from mtcnn import MTCNN
@@ -21,7 +22,7 @@ import shutil
 list_meta = sorted(glob.glob('./data/deepfake_jpegs/meta*'))
 
 #%%
-df_train0 = pd.read_json(list_meta[0])
+df_train0 = pd.read_json('./data/deepfake_jpegs/metadata1.json')
 df_train1 = pd.read_json('./data/deepfake_jpegs/metadata1.json')
 df_train2 = pd.read_json('./data/deepfake_jpegs/metadata2.json')
 df_train3 = pd.read_json('./data/deepfake_jpegs/metadata3.json')
@@ -85,10 +86,39 @@ df_vals = [df_val1, df_val2, df_val3]
 nums = list(range(len(df_trains) + 1))
 LABELS = ['REAL', 'FAKE']
 val_nums = [47, 48, 49]
+# #%%
+# # source folder with all videos
+# all_train_dir = 'D:\\Deep_Fake\\dfdc_train_all\\'
+#
+# # array of all the subdirectories
+# vid_sub_dir = [all_train_dir + x for x in os.listdir(all_train_dir)]
+# test_video_files = []
+#
+# # going through each subdirectory
+# for i in range(len(vid_sub_dir)):
+#     # go inside folder with videos
+#     test_video_dir = vid_sub_dir[i] + '\\' + str(os.listdir(vid_sub_dir[i])[0]) + '\\'
+#     # e.g.: test_video_dir[0] -> D:\Deep_Fake\dfdc_train_all\dfdc_train_part_00\dfdc_train_part_0\
+#     # an array of all the videos in tht sub directory
+#     test_video_files = os.listdir(test_video_dir)
+#
+#     # for each video in the training subdirectory
+#     for video in tqdm(test_video_files):
+#         try:
+#             if video == 'metadata.json':
+#                 if not os.path.exists('D:\\Deep_Fake\\dfdc_train_all\\metadata' + str(i) + '.json'):
+#                     shutil.copyfile(test_video_dir + video, 'D:\\Deep_Fake\\dfdc_train_all\\metadata' + str(i) + '.json')
+#                 if os.path.exists(test_video_dir+video):
+#                     os.remove(test_video_dir+video)
+#
+#         except Exception as err:
+#             print(err)
+
 
 #%%
 
 def get_path(num, x):
+
     path = './data/deepfake_jpegs/dfdc_train_part_' + str(num) + '/' + x.replace('.mp4', '_frames')
     if not os.path.exists(path):
         raise Exception
@@ -181,13 +211,76 @@ for x in fake:
     val_paths.append(x)
     val_y.append(1)
 
-
 # %%
 # Apply Underbalancing Techinique
 print('There are ' + str(y.count(1)) + ' fake train samples')
 print('There are ' + str(y.count(0)) + ' real train samples')
 print('There are ' + str(val_y.count(1)) + ' fake val samples')
 print('There are ' + str(val_y.count(0)) + ' real val samples')
+
+predictor_path = "shape_predictor_68_face_landmarks.dat"
+detector = dlib.get_frontal_face_detector()
+predictor = dlib.shape_predictor(predictor_path)
+net = cv2.dnn.readNetFromCaffe('./deploy.prototxt.txt', './res10_300x300_ssd_iter_140000.caffemodel')
+# source folder with all videos
+all_train_dir = 'D:\\Deep_Fake\\dfdc_train_all\\'
+
+ # array of all the subdirectories
+vid_sub_dir = [all_train_dir + x for x in os.listdir(all_train_dir)]
+test_video_files = []
+os.makedirs('./data/deepfake_jpegs', exist_ok=True)
+os.makedirs('./data/deepfake_features', exist_ok=True)
+
+# Inception V3 model for feature extraction
+base_mdl = InceptionV3(input_shape=(299,299,3), weights='imagenet', include_top=True)
+# only use model up to last avg_pool
+mdl = Model(inputs=base_mdl.input, outputs=base_mdl.get_layer('avg_pool').output)  # output size (None, 2048)
+
+# going through each subdirectory
+# change this to val paths I think
+
+for i in range(len(vid_sub_dir)):
+# go inside folder with videos
+#for i in range(1):
+    test_video_dir = vid_sub_dir[i] + '\\' + str(os.listdir(vid_sub_dir[i])[0]) + '\\'
+    # e.g.: test_video_dir[0] -> D:\Deep_Fake\dfdc_train_all\dfdc_train_part_00\dfdc_train_part_0\
+
+    # an array of all the videos in tht sub directory
+    test_video_files = os.listdir(test_video_dir)
+
+    # makes directory for the subdirectory of the training video
+    os.makedirs('./data/deepfake_jpegs/' + str(os.listdir(vid_sub_dir[i])[0]), exist_ok=True)
+    os.makedirs('./data/deepfake_features/'+ str(os.listdir(vid_sub_dir[i])[0]), exist_ok=True)
+    # get directory name of the directory just made
+    destination_dir = './data/deepfake_jpegs/' + str(os.listdir(vid_sub_dir[i])[0]) + '/'
+
+    destination_dir_features = './data/deepfake_features/' + str(os.listdir(vid_sub_dir[i])[0]) + '/'
+
+    # for each video in the training subdirectory
+    for video in tqdm(test_video_files):
+        #print(video)
+        try:
+            if video == 'metadata.json':
+                shutil.copyfile(test_video_dir + video, './data/deepfake_jpegs/metadata' + str(i) + '.json')
+            # start = process_time()
+            frames = detect_video(video_path=test_video_dir, video_name=video, frames_to_capture=frames_interval, destination=destination_dir, net_ogj=net)
+            video = video.replace('.mp4', '')
+            os.makedirs(destination_dir_features + video + '_features/', exist_ok=True)
+            # create inpute sequence for LSTM to use later on
+            sequence = []
+            for img in frames:
+                x = np.expand_dims(img, axis=0)
+                x = preprocess_input(x)
+                features = mdl.predict(x)
+                sequence.append(features)
+
+            np.save(destination_dir_features + video + '_features/' + video, sequence)
+            # print("total time: ", process_time() - start)
+        except Exception as err:
+            print(err)
+
+
+
 
 
 #%%
@@ -206,6 +299,7 @@ for img in tqdm(val_paths):
 
 # %%
 
+# %%
 import random
 
 

@@ -27,29 +27,47 @@ def image_face_detector(image, net):
         (startX, startY, endX, endY) = box.astype("int")
         face_w = endX - startX
         face_h = endY - startY
+        #print("original w/h: ", face_w, face_h)
         if face_w != 299:
-            offset = (299 - face_w) / 2
+            offset = int((299 - face_w) / 2)
+            #print("w offset: ", offset)
             if startX - offset < 0:
+                #print("w negative")
                 startX = 0
                 endX = 299
             elif endX + offset > w:
+                #print("w positive")
                 startX = w - 299
                 endX = w
             else:
+                #print("w normal")
                 startX = startX - offset
                 endX = endX + offset
+                if endX - startX != 299:
+                    endX += (299 - (endX - startX))
         if face_h != 299:
-            offset = (299 - face_h) / 2
+            offset = int((299 - face_h) / 2)
+            #print("h offset: ", offset)
             if startY - offset < 0:
+                #print("h negative")
                 startY = 0
                 endY = 299
             elif endY + offset > h:
+                #print("h positive")
                 startY = h - 299
                 endX = h
             else:
+                #print("h normal")
                 startY = startY - offset
                 endY = endY + offset
+                if endY - startY != 299:
+                    endY += (299 - (endY - startY))
         face_detection_coordinates.append(((startX, startY), (endX, endY)))
+        if (endX - startX != 299):
+            print("original w/h: ", face_w, face_h)
+            print("w/h: ", endX - startX, endY - startY)
+            print("offset y  ", int((299 - face_h / 2)))
+            print("offset x ", int((299 - face_w / 2)))
     return face_detection_coordinates
 
 
@@ -59,15 +77,18 @@ def detect_video_test_set(video_path, frames_to_capture, net_ogj):
     vid = cv2.VideoCapture(video_path)
     list_frames = []
     while True:
+    #while len(list_frames) < frames_to_capture:
         ret, cap = vid.read()  # Capture frame-by-frame
         if cap is not None:
             # number of faces detected in frame
             cr = image_face_detector(cap, net_ogj)
             for i in range(len(cr)):
                 frame = cap[int(cr[i][0][1]): int(cr[i][1][1]), int(cr[i][0][0]):int(cr[i][1][0])]
+                #if frame.size == 299 and frame.size[0] == 299:
                 list_frames.append(frame)
-            # sets nect frame to the 30th next frame
+            #count = (count + (int(300/frames_to_capture))) % 300
             count += frames_to_capture
+
             vid.set(1, count)
 
         else:
@@ -147,7 +168,7 @@ def define_model_lstm():
 #%%
 # -- test set procedures
 # 1) go through video and keep feature vectors in test_X
-test_vid_dir = 'E:\\test_videos\\'
+test_vid_dir = 'C:\\Users\\admin\\PycharmProjects\\gaiters_dfdc_repo\\data\\test_videos\\'
 filenames = os.listdir(test_vid_dir)
 prediction_filenames = filenames
 test_video_files = [test_vid_dir + x for x in filenames]  # get test video files paths
