@@ -604,6 +604,10 @@ def main():
     print("Saved best model to disk")
     json_file.close()
 
+    loaded_best_model_json = json_file.read()
+    json_file.close()
+
+
     # 8) save models and weights
     # serialize model to JSON
     from keras.models import model_from_json
