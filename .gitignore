@@ -16,6 +16,6 @@
 /lstm.h5
 /best_model.json
 /best_model_weights.h5
-/copymain.py
 /data/test_videos/
 /data/cropped_frame/
+/results_roc.png
